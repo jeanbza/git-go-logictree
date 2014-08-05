@@ -5,22 +5,13 @@ import (
     "testing"
 )
 
+var testingTreeRoot *treeNode
+var testingConditions []Condition
+
 func beforeEach(testName string) {
     fmt.Printf("Starting %s tests..\n", testName)
-}
 
-// Fullstack test
-/**
- * ((A && B) || C) && (D || E)
- *              AND
- *        OR           OR
- *    AND     F      G    H
- * A B C D E
- */
-func TestFullstack(t *testing.T) {
-    beforeEach("home")
-
-    conditionsIn := []Condition{
+    testingConditions = []Condition{
         Condition{Text: "(", Type: "scope", Operator: "("},
         Condition{Text: "(", Type: "scope", Operator: "("},
         Condition{Text: "(", Type: "scope", Operator: "("},
@@ -46,44 +37,100 @@ func TestFullstack(t *testing.T) {
         Condition{Text: ")", Type: "scope", Operator: ")"},
     }
 
-    // Because slices are pointers by default, and unserialize pops items, we shallow copy a new version for later use
-    var originalConditions []Condition
-    for _, condition := range conditionsIn {
-        originalConditions = append(originalConditions, condition)
-    }
+    /**
+     * lt-node-rt
+     *                                     1-AND-24
+     *                          2-OR-17                     18-OR-23
+     *              3-AND-14                15-F-16     19-G-20  21-H-22
+     * 4-A-5 6-B-7 8-C-9 10-D-11 12-E-13
+     */
+    testingTreeRoot = nil
 
-    treeRootExpectation := &treeNode{Parent: nil, Children: nil, Node: Condition{Text: "AND", Type: "logic", Operator: "AND"}}
+    // Row 1 node 1
+    testingTreeRoot = &treeNode{Parent: nil, Children: nil, Node: Condition{Text: "AND", Type: "logic", Operator: "AND"}}
 
+    // Row 2 node 1
     child1 := treeNode{Parent: nil, Children: nil, Node: Condition{Text: "OR", Type: "logic", Operator: "OR"}}
+    // Row 2 node 2
     child2 := treeNode{Parent: nil, Children: nil, Node: Condition{Text: "OR", Type: "logic", Operator: "OR"}}
-    treeRootExpectation.Children = []*treeNode{&child1, &child2}
+    testingTreeRoot.Children = []*treeNode{&child1, &child2}
 
+    // Row 3 node 1
     child3 := treeNode{Parent: &child1, Children: nil, Node: Condition{Text: "AND", Type: "logic", Operator: "AND"}}
+    // Row 3 node 2
     child4 := treeNode{Parent: &child1, Children: nil, Node: Condition{Text: "age eq 1", Type: "equality", Field: "age", Operator: "eq", Value: "1"}}
     child1.Children = []*treeNode{&child3, &child4}
 
+    // Row 3 node 3
     child5 := treeNode{Parent: &child2, Children: nil, Node: Condition{Text: "age eq 2", Type: "equality", Field: "age", Operator: "eq", Value: "2"}}
+    // Row 3 node 4
     child6 := treeNode{Parent: &child2, Children: nil, Node: Condition{Text: "age eq 3", Type: "equality", Field: "age", Operator: "eq", Value: "3"}}
     child2.Children = []*treeNode{&child5, &child6}
 
+    // Row 4 nodes 1-5
     child7 := treeNode{Parent: &child3, Children: nil, Node: Condition{Text: "age eq 4", Type: "equality", Field: "age", Operator: "eq", Value: "4"}}
     child8 := treeNode{Parent: &child3, Children: nil, Node: Condition{Text: "age eq 5", Type: "equality", Field: "age", Operator: "eq", Value: "5"}}
     child9 := treeNode{Parent: &child3, Children: nil, Node: Condition{Text: "age eq 6", Type: "equality", Field: "age", Operator: "eq", Value: "6"}}
     child10 := treeNode{Parent: &child3, Children: nil, Node: Condition{Text: "age eq 7", Type: "equality", Field: "age", Operator: "eq", Value: "7"}}
     child11 := treeNode{Parent: &child3, Children: nil, Node: Condition{Text: "age eq 8", Type: "equality", Field: "age", Operator: "eq", Value: "8"}}
     child3.Children = []*treeNode{&child7, &child8, &child9, &child10, &child11}
+}
+
+// Fullstack test: given some conditions in JSON, we should be able to parse to condition slice, serialize
+// to a tree, attach lefts and rights, and finally convert to mysql value rows to be inserted
+func TestFullstack(t *testing.T) {
+    beforeEach("home")
+
+    // Because slices are pointers by default, and unserialize pops items, we shallow copy a new version for later use
+    var originalConditions []Condition
+    for _, condition := range testingConditions {
+        originalConditions = append(originalConditions, condition)
+    }
 
     // Unserialize into a tree
+    treeReturned, errorsReturned := unserializeTree(testingConditions)
+
+    if !treeReturned.matches(testingTreeRoot) {
+        t.Errorf("unserializeTree(%v) - got %v, want %v", testingConditions, treeReturned.print(), testingTreeRoot.print())
+    }
+
     var expectedOutErr error
+    if errorsReturned != expectedOutErr {
+        t.Errorf("unserializeTree(%v) errorsReturned - got %v, want %v", testingConditions, errorsReturned, expectedOutErr)
+    }
 
-    treeReturned, errorsReturned := unserializeTree(conditionsIn)
+    // Serialize back into conditions array
+    conditionsReturned, errorsReturned := serializeTree(treeReturned)
 
-    if !treeReturned.matches(treeRootExpectation) {
-        t.Errorf("unserializeTree(%v) - got %v, want %v", conditionsIn, treeReturned.print(), treeRootExpectation.print())
+    if !matchesArray(conditionsReturned, originalConditions) {
+        t.Errorf("serializeTree(%v) conditionsReturned - got %v, want %v", treeReturned, simplifyConditions(conditionsReturned), simplifyConditions(originalConditions))
     }
 
     if errorsReturned != expectedOutErr {
-        t.Errorf("unserializeTree(%v) errorsReturned - got %v, want %v", conditionsIn, errorsReturned, expectedOutErr)
+        t.Errorf("serializeTree(%v) errorsReturned - got %v, want %v", treeReturned, errorsReturned, expectedOutErr)
+    }
+}
+
+// Roundtrip test: if we serialize a tree, then unserialize the result, we should get the original tree back
+func TestSerializationRoundtrip(t *testing.T) {
+    beforeEach("home")
+
+    // Because slices are pointers by default, and unserialize pops items, we shallow copy a new version for later use
+    var originalConditions []Condition
+    for _, condition := range testingConditions {
+        originalConditions = append(originalConditions, condition)
+    }
+
+    // Unserialize into a tree
+    treeReturned, errorsReturned := unserializeTree(testingConditions)
+
+    if !treeReturned.matches(testingTreeRoot) {
+        t.Errorf("unserializeTree(%v) - got %v, want %v", testingConditions, treeReturned.print(), testingTreeRoot.print())
+    }
+
+    var expectedOutErr error
+    if errorsReturned != expectedOutErr {
+        t.Errorf("unserializeTree(%v) errorsReturned - got %v, want %v", testingConditions, errorsReturned, expectedOutErr)
     }
 
     // Serialize back into conditions array

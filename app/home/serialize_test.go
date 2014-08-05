@@ -10,7 +10,6 @@ func TestSerializeTreeOneNodeZeroDepth(t *testing.T) {
 
     root := &treeNode{Parent: nil, Children: nil, Node: Condition{Text: "age eq 5", Type: "equality", Field: "age", Operator: "eq", Value: "5"}}
     expectedOut := []Condition{Condition{Text: "age eq 5", Type: "equality", Field: "age", Operator: "eq", Value: "5"}}
-    var expectedOutErr error
 
     conditionsReturned, errorsReturned := serializeTree(root)
 
@@ -18,6 +17,7 @@ func TestSerializeTreeOneNodeZeroDepth(t *testing.T) {
         t.Errorf("serializeTree(%v) - got %v, want %v", root, conditionsReturned, expectedOut)
     }
 
+    var expectedOutErr error
     if errorsReturned != expectedOutErr {
         t.Errorf("serializeTree(%v) errorsReturned - got %v, want %v", root, errorsReturned, expectedOutErr)
     }
@@ -44,7 +44,6 @@ func TestSerializeTreeThreeNodeOneDepth(t *testing.T) {
         Condition{Text: "age eq 2", Type: "equality", Field: "age", Operator: "eq", Value: "2"},
         Condition{Text: ")", Type: "scope", Operator: ")"},
     }
-    var expectedOutErr error
 
     conditionsReturned, errorsReturned := serializeTree(root)
 
@@ -52,6 +51,7 @@ func TestSerializeTreeThreeNodeOneDepth(t *testing.T) {
         t.Errorf("serializeTree(%v) conditionsReturned - got %v, want %v", root, conditionsReturned, expectedOut)
     }
 
+    var expectedOutErr error
     if errorsReturned != expectedOutErr {
         t.Errorf("serializeTree(%v) errorsReturned - got %v, want %v", root, errorsReturned, expectedOutErr)
     }
@@ -105,7 +105,6 @@ func TestSerializeTreeArbitraryDepth(t *testing.T) {
         Condition{Text: ")", Type: "scope", Operator: ")"},
         Condition{Text: ")", Type: "scope", Operator: ")"},
     }
-    var expectedOutErr error
 
     conditionsReturned, errorsReturned := serializeTree(root)
 
@@ -113,78 +112,25 @@ func TestSerializeTreeArbitraryDepth(t *testing.T) {
         t.Errorf("serializeTree(%v) conditionsReturned - got %v, want %v", root, simplifyConditions(conditionsReturned), simplifyConditions(expectedOut))
     }
 
+    var expectedOutErr error
     if errorsReturned != expectedOutErr {
         t.Errorf("serializeTree(%v) errorsReturned - got %v, want %v", root, errorsReturned, expectedOutErr)
     }
 }
 
 // SERIALIZE ARBITRARY WIDTH: It should be able to serialize a tree with any amount of children on a branch
-/**
- * ((A && B) || C) && (D || E)
- *              AND
- *        OR           OR
- *    AND     F      G    H
- * A B C D E
- */
 func TestSerializeTreeArbitraryWidth(t *testing.T) {
     beforeEach("serialize")
 
-    root := &treeNode{Parent: nil, Children: nil, Node: Condition{Text: "AND", Type: "logic", Operator: "AND"}}
+    conditionsReturned, errorsReturned := serializeTree(testingTreeRoot)
 
-    child1 := treeNode{Parent: nil, Children: nil, Node: Condition{Text: "OR", Type: "logic", Operator: "OR"}}
-    child2 := treeNode{Parent: nil, Children: nil, Node: Condition{Text: "OR", Type: "logic", Operator: "OR"}}
-    root.Children = []*treeNode{&child1, &child2}
-
-    child3 := treeNode{Parent: &child1, Children: nil, Node: Condition{Text: "AND", Type: "logic", Operator: "AND"}}
-    child4 := treeNode{Parent: &child1, Children: nil, Node: Condition{Text: "age eq 1", Type: "equality", Field: "age", Operator: "eq", Value: "1"}}
-    child1.Children = []*treeNode{&child3, &child4}
-
-    child5 := treeNode{Parent: &child2, Children: nil, Node: Condition{Text: "age eq 2", Type: "equality", Field: "age", Operator: "eq", Value: "2"}}
-    child6 := treeNode{Parent: &child2, Children: nil, Node: Condition{Text: "age eq 3", Type: "equality", Field: "age", Operator: "eq", Value: "3"}}
-    child2.Children = []*treeNode{&child5, &child6}
-
-    child7 := treeNode{Parent: &child3, Children: nil, Node: Condition{Text: "age eq 4", Type: "equality", Field: "age", Operator: "eq", Value: "4"}}
-    child8 := treeNode{Parent: &child3, Children: nil, Node: Condition{Text: "age eq 5", Type: "equality", Field: "age", Operator: "eq", Value: "5"}}
-    child9 := treeNode{Parent: &child3, Children: nil, Node: Condition{Text: "age eq 6", Type: "equality", Field: "age", Operator: "eq", Value: "6"}}
-    child10 := treeNode{Parent: &child3, Children: nil, Node: Condition{Text: "age eq 7", Type: "equality", Field: "age", Operator: "eq", Value: "7"}}
-    child11 := treeNode{Parent: &child3, Children: nil, Node: Condition{Text: "age eq 8", Type: "equality", Field: "age", Operator: "eq", Value: "8"}}
-    child3.Children = []*treeNode{&child7, &child8, &child9, &child10, &child11}
-
-    expectedOut := []Condition{
-        Condition{Text: "(", Type: "scope", Operator: "("},
-        Condition{Text: "(", Type: "scope", Operator: "("},
-        Condition{Text: "(", Type: "scope", Operator: "("},
-        Condition{Text: "age eq 4", Type: "equality", Field: "age", Operator: "eq", Value: "4"},
-        Condition{Text: "AND", Type: "logic", Operator: "AND"},
-        Condition{Text: "age eq 5", Type: "equality", Field: "age", Operator: "eq", Value: "5"},
-        Condition{Text: "AND", Type: "logic", Operator: "AND"},
-        Condition{Text: "age eq 6", Type: "equality", Field: "age", Operator: "eq", Value: "6"},
-        Condition{Text: "AND", Type: "logic", Operator: "AND"},
-        Condition{Text: "age eq 7", Type: "equality", Field: "age", Operator: "eq", Value: "7"},
-        Condition{Text: "AND", Type: "logic", Operator: "AND"},
-        Condition{Text: "age eq 8", Type: "equality", Field: "age", Operator: "eq", Value: "8"},
-        Condition{Text: ")", Type: "scope", Operator: ")"},
-        Condition{Text: "OR", Type: "logic", Operator: "OR"},
-        Condition{Text: "age eq 1", Type: "equality", Field: "age", Operator: "eq", Value: "1"},
-        Condition{Text: ")", Type: "scope", Operator: ")"},
-        Condition{Text: "AND", Type: "logic", Operator: "AND"},
-        Condition{Text: "(", Type: "scope", Operator: "("},
-        Condition{Text: "age eq 2", Type: "equality", Field: "age", Operator: "eq", Value: "2"},
-        Condition{Text: "OR", Type: "logic", Operator: "OR"},
-        Condition{Text: "age eq 3", Type: "equality", Field: "age", Operator: "eq", Value: "3"},
-        Condition{Text: ")", Type: "scope", Operator: ")"},
-        Condition{Text: ")", Type: "scope", Operator: ")"},
+    if !matchesArray(conditionsReturned, testingConditions) {
+        t.Errorf("serializeTree(%v) conditionsReturned - got %v, want %v", testingTreeRoot, simplifyConditions(conditionsReturned), simplifyConditions(testingConditions))
     }
+
     var expectedOutErr error
-
-    conditionsReturned, errorsReturned := serializeTree(root)
-
-    if !matchesArray(conditionsReturned, expectedOut) {
-        t.Errorf("serializeTree(%v) conditionsReturned - got %v, want %v", root, simplifyConditions(conditionsReturned), simplifyConditions(expectedOut))
-    }
-
     if errorsReturned != expectedOutErr {
-        t.Errorf("serializeTree(%v) errorsReturned - got %v, want %v", root, errorsReturned, expectedOutErr)
+        t.Errorf("serializeTree(%v) errorsReturned - got %v, want %v", testingTreeRoot, errorsReturned, expectedOutErr)
     }
 }
 
