@@ -1,0 +1,101 @@
+{{define "body"}}
+    <script type="text/javascript">
+    function updateConditions() {
+        var conditions = [];
+        $("#sortable li").each(function(k, v) {
+            var condition = {
+                Type: $(v).attr("data-type"),
+                Text: $(v).text(),
+                Field: $(v).attr("data-field"),
+                Operator: $(v).attr("data-operator"),
+                Value: $(v).attr("data-value")
+            }
+
+            conditions.push(condition);
+        });
+
+        $.ajax({
+            url: "/updateConditions",
+            method: "POST",
+            data: {
+                conditions: JSON.stringify(conditions)
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        $("#addEquality").click(function(e) {
+            e.preventDefault();
+
+            equalities = [];
+
+            $("#sortable li").each(function(key, condition) {
+                if ($(condition).attr("data-type") == "equality") {
+                    var condition = {
+                        Field: $(condition).attr("data-field"),
+                        Operator: $(condition).attr("data-operator"),
+                        Value: $(condition).attr("data-value")
+                    }
+
+                    equalities.push(condition);
+                }
+            });
+
+            updateConditions();
+        });
+
+        $("#sortable").sortable({
+            change: function() {
+                updateConditions();
+            }
+        });
+        $("#sortable").disableSelection();
+    });
+    </script>
+
+    <table class="main-table">
+        <tr>
+            <td>
+                <form id="addEquality" action="/save" method="post">
+                    Field:
+                    <select name="field">
+                        <option value="age">Age</option>
+                        <option value="pets"># Pets</option>
+                    </select>
+                    Operator:
+                    <select name="operator">
+                        <option value="eq">=</option>
+                        <option value="ne">!=</option>
+                        <option value="gt">></option>
+                        <option value="lt"><</option>
+                    </select>
+                    Value: <input name="value"></input>
+                    <input type="submit">
+                </form>
+            </td>
+            <td>
+                two
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <h4>Equality Conditions</h4>
+                <form action="truncate_equality" method="post">
+                    <input type="submit" value="Truncate">
+                </form>
+                <ul id="sortable">
+                    {{range .Conditions}}
+                        {{if eq .Type "equality"}}
+                            <li class="ui-state-default" data-type='{{.Type}}' data-field='{{.Field}}' data-operator='{{.Operator}}' data-value='{{.Value}}'>{{.Text}}</li>
+                        {{else}}
+                            <li class="ui-state-default" data-type='{{.Type}}'>{{.Text}}</li>
+                        {{end}}
+                    {{end}}
+                </ul>
+            </td>
+            <td>
+                four
+            </td>
+        </tr>
+    </table>
+{{end}}

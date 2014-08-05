@@ -1,0 +1,23 @@
+.main-table {
+    width: 100%;
+    height: 600px;
+}
+
+.main-table td {
+    border: 1px solid black;
+    width: 50%;
+    padding: 10px;
+    vertical-align: top;
+}
+
+#sortable {
+    margin-top: 20px;
+    list-style: none;
+}
+
+#sortable li {
+    margin: 0 5px;
+    float: left;
+    color: black;
+    padding: 0 5px;
+}
