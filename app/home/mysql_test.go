@@ -2,6 +2,8 @@ package home
 
 import (
     "testing"
+    "database/sql"
+    _ "github.com/go-sql-driver/mysql"
 )
 
 // ATTACH LEFTS AND RIGHTS TO TREE: It should be able to assign lefts and rights to a tree
@@ -50,11 +52,49 @@ func TestToMysql(t *testing.T) {
 
     equalityReturned, logicReturned := testingTreeRoot.toMysql()
 
-    if equalityReturned != testingMysqlEquality {
-        t.Errorf("%v.toMysql() equalityReturned - got %v, want %v", testingTreeRoot, equalityReturned, testingMysqlEquality)
+    if equalityReturned != testingMysqlEqualityInput {
+        t.Errorf("%v.toMysql() equalityReturned - got %v, want %v", testingTreeRoot, equalityReturned, testingMysqlEqualityInput)
     }
 
-    if logicReturned != testingMysqlLogic {
-        t.Errorf("%v.toMysql() logicReturned - got %v, want %v", testingTreeRoot, logicReturned, testingMysqlLogic)
+    if logicReturned != testingMysqlLogicInput {
+        t.Errorf("%v.toMysql() logicReturned - got %v, want %v", testingTreeRoot, logicReturned, testingMysqlLogicInput)
+    }
+}
+
+func TestUpdateDatabase(t *testing.T) {
+    var Field, Operator, Value string
+    var Left, Right int
+    var equalityRowsReturned []equalitySqlRow
+    var logicRowsReturned []logicSqlRow
+
+    db, _ := sql.Open("mysql", "root:@/")
+    defer db.Close()
+
+    updateDatabase(testingTreeRoot.toMysql())
+
+    // Get equality sql rows
+    rows, _ := db.Query("SELECT field, operator, value, rt, lt FROM logictree.equality")
+    defer rows.Close()
+
+    for rows.Next() {
+        rows.Scan(&Field, &Operator, &Value, &Left, &Right)
+        equalityRowsReturned = append(equalityRowsReturned, equalitySqlRow{Field: Field, Operator: Operator, Value: Value, Left: Left, Right: Right})
+    }
+
+    if !equalitySqlMatchesArray(equalityRowsReturned, testingMysqlEqualityOutput) {
+        t.Errorf("updateDatabase(%v) equalityReturned - got %v, want %v", testingTreeRoot, equalityRowsReturned, testingMysqlEqualityOutput)
+    }
+
+    // Get logic sql rows
+    rows, _ = db.Query("SELECT operator, rt, lt FROM logictree.logic")
+    defer rows.Close()
+
+    for rows.Next() {
+        rows.Scan(&Field, &Operator, &Value, &Left, &Right)
+        logicRowsReturned = append(logicRowsReturned, logicSqlRow{Operator: Operator, Left: Left, Right: Right})
+    }
+
+    if !logicSqlMatchesArray(logicRowsReturned, testingMysqlLogicOutput) {
+        t.Errorf("updateDatabase(%v) equalityReturned - got %v, want %v", testingTreeRoot, logicRowsReturned, testingMysqlLogicOutput)
     }
 }

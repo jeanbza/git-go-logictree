@@ -21,6 +21,16 @@ type treeNode struct {
     Left, Right int
 }
 
+type equalitySqlRow struct {
+    Field, Operator, Value string
+    Left, Right int
+}
+
+type logicSqlRow struct {
+    Operator string
+    Left, Right int
+}
+
 func GetHomePage(rw http.ResponseWriter, req *http.Request) {
     type Page struct {
         Title string
@@ -268,4 +278,7 @@ func (t *treeNode) getChildrenConditions() []Condition {
     return children
 }
 
+func updateDatabase(equalityStr, logicStr string) {
+    
+}
 

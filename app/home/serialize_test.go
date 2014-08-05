@@ -13,7 +13,7 @@ func TestSerializeTreeOneNodeZeroDepth(t *testing.T) {
 
     conditionsReturned, errorsReturned := serializeTree(root)
 
-    if !matchesArray(conditionsReturned, expectedOut) {
+    if !conditionsMatchesArray(conditionsReturned, expectedOut) {
         t.Errorf("serializeTree(%v) - got %v, want %v", root, conditionsReturned, expectedOut)
     }
 
@@ -47,7 +47,7 @@ func TestSerializeTreeThreeNodeOneDepth(t *testing.T) {
 
     conditionsReturned, errorsReturned := serializeTree(root)
 
-    if !matchesArray(conditionsReturned, expectedOut) {
+    if !conditionsMatchesArray(conditionsReturned, expectedOut) {
         t.Errorf("serializeTree(%v) conditionsReturned - got %v, want %v", root, conditionsReturned, expectedOut)
     }
 
@@ -108,7 +108,7 @@ func TestSerializeTreeArbitraryDepth(t *testing.T) {
 
     conditionsReturned, errorsReturned := serializeTree(root)
 
-    if !matchesArray(conditionsReturned, expectedOut) {
+    if !conditionsMatchesArray(conditionsReturned, expectedOut) {
         t.Errorf("serializeTree(%v) conditionsReturned - got %v, want %v", root, simplifyConditions(conditionsReturned), simplifyConditions(expectedOut))
     }
 
@@ -124,7 +124,7 @@ func TestSerializeTreeArbitraryWidth(t *testing.T) {
 
     conditionsReturned, errorsReturned := serializeTree(testingTreeRoot)
 
-    if !matchesArray(conditionsReturned, testingConditions) {
+    if !conditionsMatchesArray(conditionsReturned, testingConditions) {
         t.Errorf("serializeTree(%v) conditionsReturned - got %v, want %v", testingTreeRoot, simplifyConditions(conditionsReturned), simplifyConditions(testingConditions))
     }
 
