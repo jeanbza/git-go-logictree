@@ -7,7 +7,7 @@ import (
 
 var testingTreeRoot *treeNode
 var testingConditions []Condition
-var testingJSON string
+var testingJSON, testingMysqlEquality, testingMysqlLogic string
 
 // Fullstack test: given some conditions in JSON, we should be able to parse to condition slice, serialize
 // to a tree, attach lefts and rights, and finally convert to mysql value rows to be inserted
@@ -41,6 +41,17 @@ func TestFullstack(t *testing.T) {
 
     if errorsReturned != expectedOutErr {
         t.Errorf("unserializeTree(%v) errorsReturned - got %v, want %v", conditionsReturned, errorsReturned, expectedOutErr)
+    }
+
+    // Convert tree to mysql input rows
+    equalityReturned, logicReturned := treeReturned.toMysql()
+
+    if equalityReturned != testingMysqlEquality {
+        t.Errorf("%v.toMysql() equalityReturned - got %v, want %v", treeReturned, equalityReturned, testingMysqlEquality)
+    }
+
+    if logicReturned != testingMysqlLogic {
+        t.Errorf("%v.toMysql() logicReturned - got %v, want %v", treeReturned, logicReturned, testingMysqlLogic)
     }
 }
 
@@ -194,6 +205,44 @@ func (conditionA Condition) matches(conditionB Condition) bool {
 func beforeEach(testName string) {
     fmt.Printf("Starting %s tests..\n", testName)
 
+    /**
+     * lt-node-rt
+     *                                     1-AND-24
+     *                          2-OR-17                     18-OR-23
+     *              3-AND-14                15-F-16     19-G-20  21-H-22
+     * 4-A-5 6-B-7 8-C-9 10-D-11 12-E-13
+     */
+    testingTreeRoot = nil
+
+    // Row 1 node 1
+    testingTreeRoot = &treeNode{Parent: nil, Children: nil, Node: Condition{Text: "AND", Type: "logic", Operator: "AND"}}
+
+    // Row 2 node 1
+    child1 := treeNode{Parent: nil, Children: nil, Node: Condition{Text: "OR", Type: "logic", Operator: "OR"}}
+    // Row 2 node 2
+    child2 := treeNode{Parent: nil, Children: nil, Node: Condition{Text: "OR", Type: "logic", Operator: "OR"}}
+    testingTreeRoot.Children = []*treeNode{&child1, &child2}
+
+    // Row 3 node 1
+    child3 := treeNode{Parent: &child1, Children: nil, Node: Condition{Text: "AND", Type: "logic", Operator: "AND"}}
+    // Row 3 node 2
+    child4 := treeNode{Parent: &child1, Children: nil, Node: Condition{Text: "age eq 1", Type: "equality", Field: "age", Operator: "eq", Value: "1"}}
+    child1.Children = []*treeNode{&child3, &child4}
+
+    // Row 3 node 3
+    child5 := treeNode{Parent: &child2, Children: nil, Node: Condition{Text: "age eq 2", Type: "equality", Field: "age", Operator: "eq", Value: "2"}}
+    // Row 3 node 4
+    child6 := treeNode{Parent: &child2, Children: nil, Node: Condition{Text: "age eq 3", Type: "equality", Field: "age", Operator: "eq", Value: "3"}}
+    child2.Children = []*treeNode{&child5, &child6}
+
+    // Row 4 nodes 1-5
+    child7 := treeNode{Parent: &child3, Children: nil, Node: Condition{Text: "age eq 4", Type: "equality", Field: "age", Operator: "eq", Value: "4"}}
+    child8 := treeNode{Parent: &child3, Children: nil, Node: Condition{Text: "age eq 5", Type: "equality", Field: "age", Operator: "eq", Value: "5"}}
+    child9 := treeNode{Parent: &child3, Children: nil, Node: Condition{Text: "age eq 6", Type: "equality", Field: "age", Operator: "eq", Value: "6"}}
+    child10 := treeNode{Parent: &child3, Children: nil, Node: Condition{Text: "age eq 7", Type: "equality", Field: "age", Operator: "eq", Value: "7"}}
+    child11 := treeNode{Parent: &child3, Children: nil, Node: Condition{Text: "age eq 8", Type: "equality", Field: "age", Operator: "eq", Value: "8"}}
+    child3.Children = []*treeNode{&child7, &child8, &child9, &child10, &child11}
+
     testingJSON = `
         [
             {"Text": "(", "Type": "scope", "Operator": "("},
@@ -248,41 +297,14 @@ func beforeEach(testName string) {
         Condition{Text: ")", Type: "scope", Operator: ")"},
     }
 
-    /**
-     * lt-node-rt
-     *                                     1-AND-24
-     *                          2-OR-17                     18-OR-23
-     *              3-AND-14                15-F-16     19-G-20  21-H-22
-     * 4-A-5 6-B-7 8-C-9 10-D-11 12-E-13
-     */
-    testingTreeRoot = nil
-
-    // Row 1 node 1
-    testingTreeRoot = &treeNode{Parent: nil, Children: nil, Node: Condition{Text: "AND", Type: "logic", Operator: "AND"}}
-
-    // Row 2 node 1
-    child1 := treeNode{Parent: nil, Children: nil, Node: Condition{Text: "OR", Type: "logic", Operator: "OR"}}
-    // Row 2 node 2
-    child2 := treeNode{Parent: nil, Children: nil, Node: Condition{Text: "OR", Type: "logic", Operator: "OR"}}
-    testingTreeRoot.Children = []*treeNode{&child1, &child2}
-
-    // Row 3 node 1
-    child3 := treeNode{Parent: &child1, Children: nil, Node: Condition{Text: "AND", Type: "logic", Operator: "AND"}}
-    // Row 3 node 2
-    child4 := treeNode{Parent: &child1, Children: nil, Node: Condition{Text: "age eq 1", Type: "equality", Field: "age", Operator: "eq", Value: "1"}}
-    child1.Children = []*treeNode{&child3, &child4}
-
-    // Row 3 node 3
-    child5 := treeNode{Parent: &child2, Children: nil, Node: Condition{Text: "age eq 2", Type: "equality", Field: "age", Operator: "eq", Value: "2"}}
-    // Row 3 node 4
-    child6 := treeNode{Parent: &child2, Children: nil, Node: Condition{Text: "age eq 3", Type: "equality", Field: "age", Operator: "eq", Value: "3"}}
-    child2.Children = []*treeNode{&child5, &child6}
-
-    // Row 4 nodes 1-5
-    child7 := treeNode{Parent: &child3, Children: nil, Node: Condition{Text: "age eq 4", Type: "equality", Field: "age", Operator: "eq", Value: "4"}}
-    child8 := treeNode{Parent: &child3, Children: nil, Node: Condition{Text: "age eq 5", Type: "equality", Field: "age", Operator: "eq", Value: "5"}}
-    child9 := treeNode{Parent: &child3, Children: nil, Node: Condition{Text: "age eq 6", Type: "equality", Field: "age", Operator: "eq", Value: "6"}}
-    child10 := treeNode{Parent: &child3, Children: nil, Node: Condition{Text: "age eq 7", Type: "equality", Field: "age", Operator: "eq", Value: "7"}}
-    child11 := treeNode{Parent: &child3, Children: nil, Node: Condition{Text: "age eq 8", Type: "equality", Field: "age", Operator: "eq", Value: "8"}}
-    child3.Children = []*treeNode{&child7, &child8, &child9, &child10, &child11}
+    // INSERT INTO logictree.equality (field, operator, value, lt, rt) VALUES ...
+    testingMysqlEquality = "('age', 'eq', '4', 4, 5),('age', 'eq', '5', 6, 7),('age', 'eq', '6', 8, 9),('age', 'eq', '7', 10, 11),('age', 'eq', '8', 12, 13),('age', 'eq', '1', 15, 16),('age', 'eq', '2', 19, 20),('age', 'eq', '3', 21, 22)"
+    
+    // INSERT INTO logictree.logic (operator, lt, rt) VALUES ...
+    testingMysqlLogic = "('AND', 3, 14),('OR', 2, 17),('OR', 18, 23),('AND', 1, 24)"
 }
+
+
+
+
+
