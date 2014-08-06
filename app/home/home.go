@@ -9,7 +9,7 @@ import (
     "database/sql"
 
     _ "github.com/go-sql-driver/mysql"
-    "git-misc/logic-tree/app/common"
+    "git-go-logictree/app/common"
 )
 
 type Condition struct {
@@ -51,10 +51,10 @@ func GetHomePage(rw http.ResponseWriter, req *http.Request) {
 
 func UpdateConditions(rw http.ResponseWriter, req *http.Request) {
     conditions := req.FormValue("conditions");
-    fmt.Println(conditions);
 
     parsedConditions, _ := parseJSON(conditions);
-    fmt.Println(parsedConditions);
+    treeRoot, _ := unserializeTree(parsedConditions)
+    updateDatabase(treeRoot.toMysql())
 
     GetHomePage(rw, req)
 }
@@ -284,10 +284,14 @@ func updateDatabase(equalityStr, logicStr string) {
     db, _ := sql.Open("mysql", "root:@/")
     defer db.Close()
 
-    db.Query("TRUNCATE TABLE logictree.equality")
-    db.Query("INSERT INTO logictree.equality (field, operator, value, lt, rt) VALUES "+equalityStr)
+    _, err := db.Query("TRUNCATE TABLE logictree.equality")
+    common.CheckError(err, 2)
+    _, err = db.Query("INSERT INTO logictree.equality (field, operator, value, lt, rt) VALUES "+equalityStr)
+    common.CheckError(err, 2)
 
-    db.Query("TRUNCATE TABLE logictree.logic")
-    db.Query("INSERT INTO logictree.logic (operator, lt, rt) VALUES "+logicStr)
+    _, err = db.Query("TRUNCATE TABLE logictree.logic")
+    common.CheckError(err, 2)
+    _, err = db.Query("INSERT INTO logictree.logic (operator, lt, rt) VALUES "+logicStr)
+    common.CheckError(err, 2)
 }
 

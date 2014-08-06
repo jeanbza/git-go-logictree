@@ -5,8 +5,8 @@ import (
     "time"
     "flag"
 
-    "git-misc/logic-tree/app/common"
-    "git-misc/logic-tree/app/home"
+    "git-go-logictree/app/common"
+    "git-go-logictree/app/home"
 
     "github.com/gorilla/mux"
     "github.com/golang/glog"

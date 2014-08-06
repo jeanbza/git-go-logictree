@@ -23,9 +23,34 @@
         });
     }
 
+    function addEquality() {
+        if (!$("#value").val()) {
+            return
+        }
+
+        var field = $("#field").val();
+        var operator = $("#operator").val();
+        var value = $("#value").val();
+
+        var logicTemplate = $("#sortable .logic").first().clone();
+        logicTemplate.text("AND");
+
+        var equalityTemplate = $("#sortable .equality").first().clone();
+        equalityTemplate.attr("data-field", field);
+        equalityTemplate.attr("data-operator", operator);
+        equalityTemplate.attr("data-value", value);
+        equalityTemplate.text(field+" "+operator+" "+value);
+
+        $("#sortable").append(logicTemplate).append(equalityTemplate);
+
+        $("#value").val("");
+    }
+
     $(document).ready(function() {
         $("#addEquality").click(function(e) {
             e.preventDefault();
+
+            addEquality();
 
             equalities = [];
 
@@ -58,18 +83,18 @@
             <td>
                 <form id="addEquality" action="/save" method="post">
                     Field:
-                    <select name="field">
+                    <select id="field" name="field">
                         <option value="age">Age</option>
                         <option value="pets"># Pets</option>
                     </select>
                     Operator:
-                    <select name="operator">
+                    <select id="operator" name="operator">
                         <option value="eq">=</option>
                         <option value="ne">!=</option>
                         <option value="gt">></option>
                         <option value="lt"><</option>
                     </select>
-                    Value: <input name="value"></input>
+                    Value: <input id="value" name="value"></input>
                     <input type="submit">
                 </form>
             </td>
@@ -86,9 +111,9 @@
                 <ul id="sortable">
                     {{range .Conditions}}
                         {{if eq .Type "equality"}}
-                            <li class="ui-state-default" data-type='{{.Type}}' data-field='{{.Field}}' data-operator='{{.Operator}}' data-value='{{.Value}}'>{{.Text}}</li>
+                            <li class="ui-state-default equality" data-type='{{.Type}}' data-field='{{.Field}}' data-operator='{{.Operator}}' data-value='{{.Value}}'>{{.Text}}</li>
                         {{else}}
-                            <li class="ui-state-default" data-type='{{.Type}}'>{{.Text}}</li>
+                            <li class="ui-state-default logic" data-type='{{.Type}}'>{{.Text}}</li>
                         {{end}}
                     {{end}}
                 </ul>
