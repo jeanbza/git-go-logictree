@@ -6,7 +6,9 @@ import (
     "net/http"
     "html/template"
     "errors"
+    "database/sql"
 
+    _ "github.com/go-sql-driver/mysql"
     "git-misc/logic-tree/app/common"
 )
 
@@ -279,6 +281,13 @@ func (t *treeNode) getChildrenConditions() []Condition {
 }
 
 func updateDatabase(equalityStr, logicStr string) {
-    
+    db, _ := sql.Open("mysql", "root:@/")
+    defer db.Close()
+
+    db.Query("TRUNCATE TABLE logictree.equality")
+    db.Query("INSERT INTO logictree.equality (field, operator, value, lt, rt) VALUES "+equalityStr)
+
+    db.Query("TRUNCATE TABLE logictree.logic")
+    db.Query("INSERT INTO logictree.logic (operator, lt, rt) VALUES "+logicStr)
 }
 

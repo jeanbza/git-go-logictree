@@ -73,7 +73,7 @@ func TestUpdateDatabase(t *testing.T) {
     updateDatabase(testingTreeRoot.toMysql())
 
     // Get equality sql rows
-    rows, _ := db.Query("SELECT field, operator, value, rt, lt FROM logictree.equality")
+    rows, _ := db.Query("SELECT field, operator, value, lt, rt FROM logictree.equality")
     defer rows.Close()
 
     for rows.Next() {
@@ -86,11 +86,11 @@ func TestUpdateDatabase(t *testing.T) {
     }
 
     // Get logic sql rows
-    rows, _ = db.Query("SELECT operator, rt, lt FROM logictree.logic")
+    rows, _ = db.Query("SELECT operator, lt, rt FROM logictree.logic")
     defer rows.Close()
 
     for rows.Next() {
-        rows.Scan(&Field, &Operator, &Value, &Left, &Right)
+        rows.Scan(&Operator, &Left, &Right)
         logicRowsReturned = append(logicRowsReturned, logicSqlRow{Operator: Operator, Left: Left, Right: Right})
     }
 
