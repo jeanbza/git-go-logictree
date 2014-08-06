@@ -44,7 +44,7 @@ func GetHomePage(rw http.ResponseWriter, req *http.Request) {
         Conditions: getConditions(),
     }
 
-    common.Templates = template.Must(template.New("asd").ParseFiles("templates/home/home.html", common.LayoutPath))
+    common.Templates = template.Must(template.ParseFiles("templates/home/home.html", common.LayoutPath))
     err := common.Templates.ExecuteTemplate(rw, "base", p)
     common.CheckError(err, 2)
 }
@@ -86,6 +86,7 @@ func getConditions() []Condition {
         if i != 0 {
             conditions = append(conditions, Condition{
                 Text: "AND",
+                Operator: "AND",
                 Type: "logic",
             })
         }

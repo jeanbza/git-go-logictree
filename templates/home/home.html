@@ -113,7 +113,7 @@
                         {{if eq .Type "equality"}}
                             <li class="ui-state-default equality" data-type='{{.Type}}' data-field='{{.Field}}' data-operator='{{.Operator}}' data-value='{{.Value}}'>{{.Text}}</li>
                         {{else}}
-                            <li class="ui-state-default logic" data-type='{{.Type}}'>{{.Text}}</li>
+                            <li class="ui-state-default logic" data-type='{{.Type}}' data-operator='{{.Operator}}'>{{.Text}}</li>
                         {{end}}
                     {{end}}
                 </ul>
