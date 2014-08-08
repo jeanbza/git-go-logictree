@@ -50,7 +50,7 @@ func TestAttachLeftsAndRights(t *testing.T) {
 func TestToMysql(t *testing.T) {
     beforeEach("mysql")
 
-    equalityReturned, logicReturned := testingTreeRoot.toMysql()
+    equalityReturned, logicReturned, _ := testingTreeRoot.toMysql()
 
     if equalityReturned != testingMysqlEqualityInput {
         t.Errorf("%v.toMysql() equalityReturned - got %v, want %v", testingTreeRoot, equalityReturned, testingMysqlEqualityInput)
@@ -70,7 +70,8 @@ func TestUpdateDatabase(t *testing.T) {
     db, _ := sql.Open("mysql", "root:@/")
     defer db.Close()
 
-    updateDatabase(testingTreeRoot.toMysql())
+    equalityStr, logicStr, _ := testingTreeRoot.toMysql()
+    updateDatabase(equalityStr, logicStr)
 
     // Get equality sql rows
     rows, _ := db.Query("SELECT field, operator, value, lt, rt FROM logictree.equality")

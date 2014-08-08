@@ -53,8 +53,16 @@ func UpdateConditions(rw http.ResponseWriter, req *http.Request) {
     conditions := req.FormValue("conditions");
 
     parsedConditions, _ := parseJSON(conditions);
+    fmt.Println(parsedConditions)
     treeRoot, _ := unserializeTree(parsedConditions)
-    updateDatabase(treeRoot.toMysql())
+
+    equalityStr, logicStr, err := treeRoot.toMysql()
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+
+    updateDatabase(equalityStr, logicStr)
 
     GetHomePage(rw, req)
 }
@@ -218,15 +226,23 @@ func (t *treeNode) attachLeftsAndRightsRecursively(index *int) {
     t.Right = *index
 }
 
-func (t *treeNode) toMysql() (equalityStr, logicStr string) {
+func (t *treeNode) toMysql() (equalityStr, logicStr string, err error) {
     t.attachLeftsAndRights()
 
     equalityStr, logicStr = t.toMysqlRecursively()
 
+    if len(equalityStr) == 0 {
+        return "", "", errors.New(fmt.Sprintf("Error: equality string was empty, which was unexpected. EqualityStr: %s :: LogicStr: %s", equalityStr, logicStr))
+    }
+
+    if len(logicStr) == 0 {
+        return "", "", errors.New(fmt.Sprintf("Error: logic string was empty, which was unexpected. EqualityStr: %s :: LogicStr: %s", equalityStr, logicStr))
+    }
+
     equalityStr = equalityStr[:(len(equalityStr)-1)]
     logicStr = logicStr[:(len(logicStr)-1)]
 
-    return equalityStr, logicStr
+    return equalityStr, logicStr, nil
 }
 
 func (t *treeNode) toMysqlRecursively() (equalityStr, logicStr string) {

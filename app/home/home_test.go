@@ -46,7 +46,7 @@ func TestFullstack(t *testing.T) {
     }
 
     // Convert tree to mysql input rows
-    equalityReturned, logicReturned := treeReturned.toMysql()
+    equalityReturned, logicReturned, _ := treeReturned.toMysql()
 
     if equalityReturned != testingMysqlEqualityInput {
         t.Errorf("%v.toMysql() equalityReturned - got %v, want %v", treeReturned, equalityReturned, testingMysqlEqualityInput)
