@@ -54,7 +54,7 @@ func UpdateConditions(rw http.ResponseWriter, req *http.Request) {
 
     parsedConditions, _ := parseJSON(conditions);
     fmt.Println(parsedConditions)
-    treeRoot, _ := unserializeTree(parsedConditions)
+    treeRoot, err := unserializeTree(parsedConditions)
 
     equalityStr, logicStr, err := treeRoot.toMysql()
     if err != nil {
@@ -166,6 +166,10 @@ func unserializeTree(conditions []Condition) (*treeNode, error) {
         case "equality":
             root.Children = append(root.Children, &treeNode{Parent: &root, Node: condition})
         }
+    }
+
+    if len(root.Children) > 0 && !root.Node.matches(emptyNode) {
+        return &root, nil
     }
 
     return root.Children[0], nil
@@ -311,4 +315,33 @@ func updateDatabase(equalityStr, logicStr string) {
     _, err = db.Query("INSERT INTO logictree.logic (operator, lt, rt) VALUES "+logicStr)
     common.CheckError(err, 2)
 }
+
+func (conditionA Condition) matches(conditionB Condition) bool {
+    if conditionA.Text != conditionB.Text {
+        return false
+    }
+
+    if conditionA.Type != conditionB.Type {
+        return false
+    }
+
+    if conditionA.Field != conditionB.Field {
+        return false
+    }
+
+    if conditionA.Operator != conditionB.Operator {
+        return false
+    }
+
+    if conditionA.Value != conditionB.Value {
+        return false
+    }
+
+    return true
+}
+
+
+
+
+
 

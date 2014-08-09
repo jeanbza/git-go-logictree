@@ -268,30 +268,6 @@ func (treeNodeA *treeNode) matches(treeNodeB *treeNode) bool {
     return true
 }
 
-func (conditionA Condition) matches(conditionB Condition) bool {
-    if conditionA.Text != conditionB.Text {
-        return false
-    }
-
-    if conditionA.Type != conditionB.Type {
-        return false
-    }
-
-    if conditionA.Field != conditionB.Field {
-        return false
-    }
-
-    if conditionA.Operator != conditionB.Operator {
-        return false
-    }
-
-    if conditionA.Value != conditionB.Value {
-        return false
-    }
-
-    return true
-}
-
 func beforeEach(testName string) {
     fmt.Printf("Starting %s tests..\n", testName)
 
