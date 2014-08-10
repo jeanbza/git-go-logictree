@@ -4,28 +4,28 @@ import (
     "testing"
 )
 
-// UNSERIALIZE SINGLE NODE: It should be able to unserialize a tree with only one node
-func TestUnserializeTreeOneNodeZeroDepth(t *testing.T) {
-    beforeEach("unserialize")
+// UnserializeFormatted SINGLE NODE: It should be able to unserializeFormatted a tree with only one node
+func TestUnserializeFormattedTreeOneNodeZeroDepth(t *testing.T) {
+    beforeEach("unserializeFormatted")
 
     in := []Condition{Condition{Text: "age eq 5", Type: "equality", Field: "age", Operator: "eq", Value: "5"}}
     expectedOut := &treeNode{Parent: nil, Children: nil, Node: Condition{Text: "age eq 5", Type: "equality", Field: "age", Operator: "eq", Value: "5"}}
     var expectedOutErr error
 
-    treeReturned, errorsReturned := unserializeTree(in)
+    treeReturned, errorsReturned := unserializeFormattedTree(in)
 
     if !treeReturned.matches(expectedOut) {
-        t.Errorf("unserializeTree(%v) - got %v, want %v", in, treeReturned, expectedOut)
+        t.Errorf("unserializeFormattedTree(%v) - got %v, want %v", in, treeReturned, expectedOut)
     }
 
     if errorsReturned != expectedOutErr {
-        t.Errorf("unserializeTree(%v) errorsReturned - got %v, want %v", in, errorsReturned, expectedOutErr)
+        t.Errorf("unserializeFormattedTree(%v) errorsReturned - got %v, want %v", in, errorsReturned, expectedOutErr)
     }
 }
 
-// UNSERIALIZE SINGLE DEPTH, NON-ENCLOSURE: It should be able to unserialize a tree with multiple nodes on one branch
-func TestUnserializeTreeThreeNodeOneDepth(t *testing.T) {
-    beforeEach("unserialize")
+// unserializeFormatted SINGLE DEPTH, NON-ENCLOSURE: It should be able to unserializeFormatted a tree with multiple nodes on one branch
+func TestUnserializeFormattedTreeThreeNodeOneDepth(t *testing.T) {
+    beforeEach("unserializeFormatted")
 
     in := []Condition{
         Condition{Text: "age eq 81", Type: "equality", Field: "age", Operator: "eq", Value: "81"},
@@ -38,26 +38,26 @@ func TestUnserializeTreeThreeNodeOneDepth(t *testing.T) {
     child2 := treeNode{Parent: expectedOut, Children: nil, Node: Condition{Text: "age eq 27", Type: "equality", Field: "age", Operator: "eq", Value: "27"}}
     expectedOut.Children = []*treeNode{&child1, &child2}
 
-    treeReturned, errorsReturned := unserializeTree(in)
+    treeReturned, errorsReturned := unserializeFormattedTree(in)
 
     if !treeReturned.matches(expectedOut) {
-        t.Errorf("unserializeTree(%v) - got %v, want %v", in, treeReturned.print(), expectedOut.print())
+        t.Errorf("unserializeFormattedTree(%v) - got %v, want %v", in, treeReturned.print(), expectedOut.print())
     }
 
     var expectedOutErr error
     if errorsReturned != expectedOutErr {
-        t.Errorf("unserializeTree(%v) errorsReturned - got %v, want %v", in, errorsReturned, expectedOutErr)
+        t.Errorf("unserializeFormattedTree(%v) errorsReturned - got %v, want %v", in, errorsReturned, expectedOutErr)
     }
 }
 
-// UNSERIALIZE SINGLE DEPTH, ENCLOSURE: It should be able to unserialize a tree with a node and two children
+// UnserializeFormatted SINGLE DEPTH, ENCLOSURE: It should be able to unserializeFormatted a tree with a node and two children
 /**
  * A && B
  *      AND
  *     A   B
  */
-func TestUnserializeTreeThreeNodeOneDepthEnclosure(t *testing.T) {
-    beforeEach("unserialize")
+func TestUnserializeFormattedTreeThreeNodeOneDepthEnclosure(t *testing.T) {
+    beforeEach("unserializeFormatted")
 
     in := []Condition{
         Condition{Text: "(", Type: "scope", Operator: "("},
@@ -72,19 +72,19 @@ func TestUnserializeTreeThreeNodeOneDepthEnclosure(t *testing.T) {
     child2 := treeNode{Parent: expectedOut, Children: nil, Node: Condition{Text: "age eq 27", Type: "equality", Field: "age", Operator: "eq", Value: "27"}}
     expectedOut.Children = []*treeNode{&child1, &child2}
 
-    treeReturned, errorsReturned := unserializeTree(in)
+    treeReturned, errorsReturned := unserializeFormattedTree(in)
 
     if !treeReturned.matches(expectedOut) {
-        t.Errorf("unserializeTree(%v) - got %v, want %v", in, treeReturned.print(), expectedOut.print())
+        t.Errorf("unserializeFormattedTree(%v) - got %v, want %v", in, treeReturned.print(), expectedOut.print())
     }
 
     var expectedOutErr error
     if errorsReturned != expectedOutErr {
-        t.Errorf("unserializeTree(%v) errorsReturned - got %v, want %v", in, errorsReturned, expectedOutErr)
+        t.Errorf("unserializeFormattedTree(%v) errorsReturned - got %v, want %v", in, errorsReturned, expectedOutErr)
     }
 }
 
-// // UNSERIALIZE ORDER, ARBITRARY DEPTH: It should be able to unserialize a tree with nine nodes and four levels of depth (aka, arbitrary depth) in the correct order
+// UnserializeFormatted ORDER, ARBITRARY DEPTH: It should be able to unserializeFormatted a tree with nine nodes and four levels of depth (aka, arbitrary depth) in the correct order
 // /**
 //  * ((A && B) || C) && (D || E)
 //  *             AND
@@ -92,8 +92,8 @@ func TestUnserializeTreeThreeNodeOneDepthEnclosure(t *testing.T) {
 //  *   AND     C      D    E
 //  *  A   B
 //  */
-func TestUnserializeTreeArbitraryDepth(t *testing.T) {
-    beforeEach("unserialize")
+func TestUnserializeFormattedTreeArbitraryDepth(t *testing.T) {
+    beforeEach("unserializeFormatted")
 
     in := []Condition{
         Condition{Text: "(", Type: "scope", Operator: "("},
@@ -133,30 +133,30 @@ func TestUnserializeTreeArbitraryDepth(t *testing.T) {
     child8 := treeNode{Parent: &child3, Children: nil, Node: Condition{Text: "age eq 5", Type: "equality", Field: "age", Operator: "eq", Value: "5"}}
     child3.Children = []*treeNode{&child7, &child8}
 
-    treeReturned, errorsReturned := unserializeTree(in)
+    treeReturned, errorsReturned := unserializeFormattedTree(in)
 
     if !treeReturned.matches(expectedOut) {
-        t.Errorf("unserializeTree(%v) - got %v, want %v", in, treeReturned.print(), expectedOut.print())
+        t.Errorf("unserializeFormattedTree(%v) - got %v, want %v", in, treeReturned.print(), expectedOut.print())
     }
 
     var expectedOutErr error
     if errorsReturned != expectedOutErr {
-        t.Errorf("unserializeTree(%v) errorsReturned - got %v, want %v", in, errorsReturned, expectedOutErr)
+        t.Errorf("unserializeFormattedTree(%v) errorsReturned - got %v, want %v", in, errorsReturned, expectedOutErr)
     }
 }
 
-// UNSERIALIZE ARBITRARY WIDTH: It should be able to serialize a tree with any amount of children on a branch
-func TestUnserializeTreeArbitraryWidth(t *testing.T) {
-    beforeEach("unserialize")
+// UnserializeFormatted ARBITRARY WIDTH: It should be able to serialize a tree with any amount of children on a branch
+func TestUnserializeFormattedTreeArbitraryWidth(t *testing.T) {
+    beforeEach("unserializeFormatted")
 
-    treeReturned, errorsReturned := unserializeTree(testingConditions)
+    treeReturned, errorsReturned := unserializeFormattedTree(testingConditions)
 
     if !treeReturned.matches(testingTreeRoot) {
-        t.Errorf("unserializeTree(%v) - got %v, want %v", testingConditions, treeReturned.print(), testingTreeRoot.print())
+        t.Errorf("unserializeFormattedTree(%v) - got %v, want %v", testingConditions, treeReturned.print(), testingTreeRoot.print())
     }
 
     var expectedOutErr error
     if errorsReturned != expectedOutErr {
-        t.Errorf("unserializeTree(%v) errorsReturned - got %v, want %v", testingConditions, errorsReturned, expectedOutErr)
+        t.Errorf("unserializeFormattedTree(%v) errorsReturned - got %v, want %v", testingConditions, errorsReturned, expectedOutErr)
     }
 }

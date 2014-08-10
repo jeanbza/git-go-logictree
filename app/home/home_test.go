@@ -27,21 +27,21 @@ func TestFullstack(t *testing.T) {
         t.Errorf("parseJSON(%v) errorsReturned - got %v, want %v", testingJSON, errorsReturned, expectedOutErr)
     }
 
-    // Because slices are pointers by default, and unserialize pops items, we shallow copy a new version for later use
+    // Because slices are pointers by default, and unserializeFormatted pops items, we shallow copy a new version for later use
     var originalConditions []Condition
     for _, condition := range testingConditions {
         originalConditions = append(originalConditions, condition)
     }
 
-    // Unserialize into a tree
-    treeReturned, errorsReturned := unserializeTree(conditionsReturned)
+    // unserializeFormatted into a tree
+    treeReturned, errorsReturned := unserializeFormattedTree(conditionsReturned)
 
     if !treeReturned.matches(testingTreeRoot) {
-        t.Errorf("unserializeTree(%v) - got %v, want %v", conditionsReturned, treeReturned.print(), testingTreeRoot.print())
+        t.Errorf("unserializeFormattedTree(%v) - got %v, want %v", conditionsReturned, treeReturned.print(), testingTreeRoot.print())
     }
 
     if errorsReturned != expectedOutErr {
-        t.Errorf("unserializeTree(%v) errorsReturned - got %v, want %v", conditionsReturned, errorsReturned, expectedOutErr)
+        t.Errorf("unserializeFormattedTree(%v) errorsReturned - got %v, want %v", conditionsReturned, errorsReturned, expectedOutErr)
     }
 
     // Convert tree to mysql input rows
@@ -56,26 +56,26 @@ func TestFullstack(t *testing.T) {
     }
 }
 
-// Roundtrip test: if we serialize a tree, then unserialize the result, we should get the original tree back
+// Roundtrip test: if we serialize a tree, then unserializeFormatted the result, we should get the original tree back
 func TestSerializationRoundtrip(t *testing.T) {
     beforeEach("home")
 
-    // Because slices are pointers by default, and unserialize pops items, we shallow copy a new version for later use
+    // Because slices are pointers by default, and unserializeFormatted pops items, we shallow copy a new version for later use
     var originalConditions []Condition
     for _, condition := range testingConditions {
         originalConditions = append(originalConditions, condition)
     }
 
-    // Unserialize into a tree
-    treeReturned, errorsReturned := unserializeTree(testingConditions)
+    // unserializeFormatted into a tree
+    treeReturned, errorsReturned := unserializeFormattedTree(testingConditions)
 
     if !treeReturned.matches(testingTreeRoot) {
-        t.Errorf("unserializeTree(%v) - got %v, want %v", testingConditions, treeReturned.print(), testingTreeRoot.print())
+        t.Errorf("unserializeFormattedTree(%v) - got %v, want %v", testingConditions, treeReturned.print(), testingTreeRoot.print())
     }
 
     var expectedOutErr error
     if errorsReturned != expectedOutErr {
-        t.Errorf("unserializeTree(%v) errorsReturned - got %v, want %v", testingConditions, errorsReturned, expectedOutErr)
+        t.Errorf("unserializeFormattedTree(%v) errorsReturned - got %v, want %v", testingConditions, errorsReturned, expectedOutErr)
     }
 
     // Serialize back into conditions array
@@ -332,18 +332,18 @@ func beforeEach(testName string) {
     testingMysqlLogicInput = "('AND', 'logic', 3, 14),('OR', 'logic', 2, 17),('OR', 'logic', 18, 23),('AND', 'logic', 1, 24)"
 
     testingMysqlOutput = []conditionSqlRow{
+        conditionSqlRow{Operator: "AND", Type: "logic", Left: 1, Right: 24},
+        conditionSqlRow{Operator: "OR", Type: "logic", Left: 2, Right: 17},
+        conditionSqlRow{Operator: "AND", Type: "logic", Left: 3, Right: 14},
         conditionSqlRow{Field: "age", Operator: "eq", Value: "4", Type: "equality", Left: 4, Right: 5},
         conditionSqlRow{Field: "age", Operator: "eq", Value: "5", Type: "equality", Left: 6, Right: 7},
         conditionSqlRow{Field: "age", Operator: "eq", Value: "6", Type: "equality", Left: 8, Right: 9},
         conditionSqlRow{Field: "age", Operator: "eq", Value: "7", Type: "equality", Left: 10, Right: 11},
         conditionSqlRow{Field: "age", Operator: "eq", Value: "8", Type: "equality", Left: 12, Right: 13},
         conditionSqlRow{Field: "age", Operator: "eq", Value: "1", Type: "equality", Left: 15, Right: 16},
+        conditionSqlRow{Operator: "OR", Type: "logic", Left: 18, Right: 23},
         conditionSqlRow{Field: "age", Operator: "eq", Value: "2", Type: "equality", Left: 19, Right: 20},
         conditionSqlRow{Field: "age", Operator: "eq", Value: "3", Type: "equality", Left: 21, Right: 22},
-        conditionSqlRow{Operator: "AND", Type: "logic", Left: 3, Right: 14},
-        conditionSqlRow{Operator: "OR", Type: "logic", Left: 2, Right: 17},
-        conditionSqlRow{Operator: "OR", Type: "logic", Left: 18, Right: 23},
-        conditionSqlRow{Operator: "AND", Type: "logic", Left: 1, Right: 24},
     }
 }
 

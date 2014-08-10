@@ -61,7 +61,8 @@ func TestToMysql(t *testing.T) {
     }
 }
 
-func TestUpdateDatabase(t *testing.T) {
+// INSERT INTO MYSQL
+func TestDatabaseAndBack(t *testing.T) {
     var Field, Operator, Value, Type string
     var Left, Right int
     var conditionRowsReturned []conditionSqlRow
@@ -84,4 +85,15 @@ func TestUpdateDatabase(t *testing.T) {
     if !conditionSqlMatchesArray(conditionRowsReturned, testingMysqlOutput) {
         t.Errorf("updateDatabase(%v) equalityReturned - got %v, want %v", testingTreeRoot, conditionRowsReturned, testingMysqlOutput)
     }
+
+    treeReturned := unserializeRawTree(conditionRowsReturned)
+
+    if !treeReturned.matches(testingTreeRoot) {
+        t.Errorf("unserializeRaw(%v) - got %v, want %v", conditionRowsReturned, treeReturned.print(), testingTreeRoot.print())
+    }
 }
+
+
+
+
+
