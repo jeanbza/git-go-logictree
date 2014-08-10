@@ -8,8 +8,7 @@ import (
 var testingTreeRoot *treeNode
 var testingConditions []Condition
 var testingJSON, testingMysqlEqualityInput, testingMysqlLogicInput string
-var testingMysqlEqualityOutput []equalitySqlRow
-var testingMysqlLogicOutput []logicSqlRow
+var testingMysqlOutput []conditionSqlRow
 
 // Fullstack test: given some conditions in JSON, we should be able to parse to condition slice, serialize
 // to a tree, attach lefts and rights, and finally convert to mysql value rows to be inserted
@@ -157,7 +156,7 @@ func conditionsMatchesArray(conditionsA, conditionsB []Condition) bool {
     return true
 }
 
-func equalitySqlMatchesArray(rowsA, rowsB []equalitySqlRow) bool {
+func conditionSqlMatchesArray(rowsA, rowsB []conditionSqlRow) bool {
     var truth bool
 
     if rowsA == nil || len(rowsA) != len(rowsB) {
@@ -181,47 +180,7 @@ func equalitySqlMatchesArray(rowsA, rowsB []equalitySqlRow) bool {
     return true
 }
 
-func logicSqlMatchesArray(rowsA, rowsB []logicSqlRow) bool {
-    var truth bool
-
-    if rowsA == nil || len(rowsA) != len(rowsB) {
-        return false
-    }
-
-    for _, valA := range rowsA {
-        truth = false
-
-        for _, valB := range rowsB {
-            if valA.matches(valB) {
-                truth = true
-            }
-        }
-
-        if !truth {
-            return false
-        }
-    }
-
-    return true
-}
-
-func (a logicSqlRow) matches(b logicSqlRow) bool {
-    if a.Operator != b.Operator {
-        return false
-    }
-
-    if a.Left != b.Left {
-        return false
-    }
-
-    if a.Right != b.Right {
-        return false
-    }
-
-    return true
-}
-
-func (a equalitySqlRow) matches(b equalitySqlRow) bool {
+func (a conditionSqlRow) matches(b conditionSqlRow) bool {
     if a.Field != b.Field {
         return false
     }
@@ -231,6 +190,10 @@ func (a equalitySqlRow) matches(b equalitySqlRow) bool {
     }
 
     if a.Value != b.Value {
+        return false
+    }
+
+    if a.Type != b.Type {
         return false
     }
 
@@ -364,26 +327,23 @@ func beforeEach(testName string) {
     }
 
     // INSERT INTO logictree.equality (field, operator, value, lt, rt) VALUES ...
-    testingMysqlEqualityInput = "('age', 'eq', '4', 4, 5),('age', 'eq', '5', 6, 7),('age', 'eq', '6', 8, 9),('age', 'eq', '7', 10, 11),('age', 'eq', '8', 12, 13),('age', 'eq', '1', 15, 16),('age', 'eq', '2', 19, 20),('age', 'eq', '3', 21, 22)"
+    testingMysqlEqualityInput = "('age', 'eq', '4', 'equality', 4, 5),('age', 'eq', '5', 'equality', 6, 7),('age', 'eq', '6', 'equality', 8, 9),('age', 'eq', '7', 'equality', 10, 11),('age', 'eq', '8', 'equality', 12, 13),('age', 'eq', '1', 'equality', 15, 16),('age', 'eq', '2', 'equality', 19, 20),('age', 'eq', '3', 'equality', 21, 22)"
     // INSERT INTO logictree.logic (operator, lt, rt) VALUES ...
-    testingMysqlLogicInput = "('AND', 3, 14),('OR', 2, 17),('OR', 18, 23),('AND', 1, 24)"
+    testingMysqlLogicInput = "('AND', 'logic', 3, 14),('OR', 'logic', 2, 17),('OR', 'logic', 18, 23),('AND', 'logic', 1, 24)"
 
-    testingMysqlEqualityOutput = []equalitySqlRow{
-        equalitySqlRow{Field: "age", Operator: "eq", Value: "4", Left: 4, Right: 5},
-        equalitySqlRow{Field: "age", Operator: "eq", Value: "5", Left: 6, Right: 7},
-        equalitySqlRow{Field: "age", Operator: "eq", Value: "6", Left: 8, Right: 9},
-        equalitySqlRow{Field: "age", Operator: "eq", Value: "7", Left: 10, Right: 11},
-        equalitySqlRow{Field: "age", Operator: "eq", Value: "8", Left: 12, Right: 13},
-        equalitySqlRow{Field: "age", Operator: "eq", Value: "1", Left: 15, Right: 16},
-        equalitySqlRow{Field: "age", Operator: "eq", Value: "2", Left: 19, Right: 20},
-        equalitySqlRow{Field: "age", Operator: "eq", Value: "3", Left: 21, Right: 22},
-    }
-
-    testingMysqlLogicOutput = []logicSqlRow{
-        logicSqlRow{Operator: "AND", Left: 3, Right: 14},
-        logicSqlRow{Operator: "OR", Left: 2, Right: 17},
-        logicSqlRow{Operator: "OR", Left: 18, Right: 23},
-        logicSqlRow{Operator: "AND", Left: 1, Right: 24},
+    testingMysqlOutput = []conditionSqlRow{
+        conditionSqlRow{Field: "age", Operator: "eq", Value: "4", Type: "equality", Left: 4, Right: 5},
+        conditionSqlRow{Field: "age", Operator: "eq", Value: "5", Type: "equality", Left: 6, Right: 7},
+        conditionSqlRow{Field: "age", Operator: "eq", Value: "6", Type: "equality", Left: 8, Right: 9},
+        conditionSqlRow{Field: "age", Operator: "eq", Value: "7", Type: "equality", Left: 10, Right: 11},
+        conditionSqlRow{Field: "age", Operator: "eq", Value: "8", Type: "equality", Left: 12, Right: 13},
+        conditionSqlRow{Field: "age", Operator: "eq", Value: "1", Type: "equality", Left: 15, Right: 16},
+        conditionSqlRow{Field: "age", Operator: "eq", Value: "2", Type: "equality", Left: 19, Right: 20},
+        conditionSqlRow{Field: "age", Operator: "eq", Value: "3", Type: "equality", Left: 21, Right: 22},
+        conditionSqlRow{Operator: "AND", Type: "logic", Left: 3, Right: 14},
+        conditionSqlRow{Operator: "OR", Type: "logic", Left: 2, Right: 17},
+        conditionSqlRow{Operator: "OR", Type: "logic", Left: 18, Right: 23},
+        conditionSqlRow{Operator: "AND", Type: "logic", Left: 1, Right: 24},
     }
 }
 

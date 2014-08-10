@@ -23,13 +23,8 @@ type treeNode struct {
     Left, Right int
 }
 
-type equalitySqlRow struct {
-    Field, Operator, Value string
-    Left, Right int
-}
-
-type logicSqlRow struct {
-    Operator string
+type conditionSqlRow struct {
+    Field, Operator, Value, Type string
     Left, Right int
 }
 
@@ -259,9 +254,9 @@ func (t *treeNode) toMysqlRecursively() (equalityStr, logicStr string) {
 
     switch (t.Node.Type) {
     case "equality":
-        equalityStr += fmt.Sprintf("('%s', '%s', '%s', %d, %d),", t.Node.Field, t.Node.Operator, t.Node.Value, t.Left, t.Right)
+        equalityStr += fmt.Sprintf("('%s', '%s', '%s', 'equality', %d, %d),", t.Node.Field, t.Node.Operator, t.Node.Value, t.Left, t.Right)
     case "logic":
-        logicStr += fmt.Sprintf("('%s', %d, %d),", t.Node.Operator, t.Left, t.Right)
+        logicStr += fmt.Sprintf("('%s', 'logic', %d, %d),", t.Node.Operator, t.Left, t.Right)
     }
 
     return equalityStr, logicStr
@@ -305,14 +300,12 @@ func updateDatabase(equalityStr, logicStr string) {
     db, _ := sql.Open("mysql", "root:@/")
     defer db.Close()
 
-    _, err := db.Query("TRUNCATE TABLE logictree.equality")
+    _, err := db.Query("TRUNCATE TABLE logictree.conditions")
     common.CheckError(err, 2)
-    _, err = db.Query("INSERT INTO logictree.equality (field, operator, value, lt, rt) VALUES "+equalityStr)
+    
+    _, err = db.Query("INSERT INTO logictree.conditions (field, operator, value, type, lt, rt) VALUES "+equalityStr)
     common.CheckError(err, 2)
-
-    _, err = db.Query("TRUNCATE TABLE logictree.logic")
-    common.CheckError(err, 2)
-    _, err = db.Query("INSERT INTO logictree.logic (operator, lt, rt) VALUES "+logicStr)
+    _, err = db.Query("INSERT INTO logictree.conditions (operator, type, lt, rt) VALUES "+logicStr)
     common.CheckError(err, 2)
 }
 

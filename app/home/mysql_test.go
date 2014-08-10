@@ -62,10 +62,9 @@ func TestToMysql(t *testing.T) {
 }
 
 func TestUpdateDatabase(t *testing.T) {
-    var Field, Operator, Value string
+    var Field, Operator, Value, Type string
     var Left, Right int
-    var equalityRowsReturned []equalitySqlRow
-    var logicRowsReturned []logicSqlRow
+    var conditionRowsReturned []conditionSqlRow
 
     db, _ := sql.Open("mysql", "root:@/")
     defer db.Close()
@@ -74,28 +73,15 @@ func TestUpdateDatabase(t *testing.T) {
     updateDatabase(equalityStr, logicStr)
 
     // Get equality sql rows
-    rows, _ := db.Query("SELECT field, operator, value, lt, rt FROM logictree.equality")
+    rows, _ := db.Query("SELECT field, operator, value, type, lt, rt FROM logictree.conditions")
     defer rows.Close()
 
     for rows.Next() {
-        rows.Scan(&Field, &Operator, &Value, &Left, &Right)
-        equalityRowsReturned = append(equalityRowsReturned, equalitySqlRow{Field: Field, Operator: Operator, Value: Value, Left: Left, Right: Right})
+        rows.Scan(&Field, &Operator, &Value, &Type, &Left, &Right)
+        conditionRowsReturned = append(conditionRowsReturned, conditionSqlRow{Field: Field, Operator: Operator, Value: Value, Type: Type, Left: Left, Right: Right})
     }
 
-    if !equalitySqlMatchesArray(equalityRowsReturned, testingMysqlEqualityOutput) {
-        t.Errorf("updateDatabase(%v) equalityReturned - got %v, want %v", testingTreeRoot, equalityRowsReturned, testingMysqlEqualityOutput)
-    }
-
-    // Get logic sql rows
-    rows, _ = db.Query("SELECT operator, lt, rt FROM logictree.logic")
-    defer rows.Close()
-
-    for rows.Next() {
-        rows.Scan(&Operator, &Left, &Right)
-        logicRowsReturned = append(logicRowsReturned, logicSqlRow{Operator: Operator, Left: Left, Right: Right})
-    }
-
-    if !logicSqlMatchesArray(logicRowsReturned, testingMysqlLogicOutput) {
-        t.Errorf("updateDatabase(%v) equalityReturned - got %v, want %v", testingTreeRoot, logicRowsReturned, testingMysqlLogicOutput)
+    if !conditionSqlMatchesArray(conditionRowsReturned, testingMysqlOutput) {
+        t.Errorf("updateDatabase(%v) equalityReturned - got %v, want %v", testingTreeRoot, conditionRowsReturned, testingMysqlOutput)
     }
 }
