@@ -49,7 +49,7 @@ func UpdateConditions(rw http.ResponseWriter, req *http.Request) {
 
     parsedConditions, _ := parseJSON(conditions);
     fmt.Println(parsedConditions)
-    treeRoot, err := unserializeTree(parsedConditions)
+    treeRoot, err := unserializeFormattedTree(parsedConditions)
 
     equalityStr, logicStr, err := treeRoot.toMysql()
     if err != nil {
@@ -126,7 +126,7 @@ func parseJSON(conditionsString string) ([]Condition, error) {
  * If you reach an equality condition, pop the condition, assign it as one of the children of the root
  * At the end of the loop, return the root's first child (since we have parans around all conditions we're going to be one level too deep)
 **/
-func unserializeTree(conditions []Condition) (*treeNode, error) {
+func unserializeFormattedTree(conditions []Condition) (*treeNode, error) {
     var root treeNode
     var emptyNode, condition Condition
 
@@ -140,7 +140,7 @@ func unserializeTree(conditions []Condition) (*treeNode, error) {
         switch condition.Type {
         case "scope":
             if condition.Operator == "(" {
-                children, _ := unserializeTree(conditions)
+                children, _ := unserializeFormattedTree(conditions)
 
                 if len(root.Children) == 0 {
                     root.Children = []*treeNode{children}
@@ -168,6 +168,10 @@ func unserializeTree(conditions []Condition) (*treeNode, error) {
     }
 
     return root.Children[0], nil
+}
+
+func unserializeRawTree(conditions []conditionSqlRow) *treeNode {
+    return nil
 }
 
 func serializeTree(node *treeNode) ([]Condition, error) {
@@ -302,7 +306,7 @@ func updateDatabase(equalityStr, logicStr string) {
 
     _, err := db.Query("TRUNCATE TABLE logictree.conditions")
     common.CheckError(err, 2)
-    
+
     _, err = db.Query("INSERT INTO logictree.conditions (field, operator, value, type, lt, rt) VALUES "+equalityStr)
     common.CheckError(err, 2)
     _, err = db.Query("INSERT INTO logictree.conditions (operator, type, lt, rt) VALUES "+logicStr)
