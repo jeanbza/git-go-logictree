@@ -183,7 +183,23 @@ func unserializeFormattedTree(conditions []Condition) (*treeNode, error) {
  * Return node
 **/
 func unserializeRawTree(conditions []conditionSqlRow) *treeNode {
-    return nil
+    var condition conditionSqlRow
+    root := &treeNode{}
+    key := 0
+
+    for key < len(conditions) {
+        // Pop the front item from the slice
+        condition = conditions[0]
+        conditions = append(conditions[:key], conditions[key+1:]...)
+
+        (*root).Node = condition.conv()
+
+        if condition.Left == condition.Right-1 {
+            (*root).Children = append((*root).Children, unserializeRawTree(conditions))
+        }
+    }
+
+    return root
 }
 
 func serializeTree(node *treeNode) ([]Condition, error) {
@@ -281,6 +297,10 @@ func (t *treeNode) toMysqlRecursively() (equalityStr, logicStr string) {
 func (t *treeNode) print() string {
     var s string
 
+    if t == nil {
+        return ""
+    }
+
     for _, child := range t.Children {
         s += child.print()
     }
@@ -349,7 +369,9 @@ func (conditionA Condition) matches(conditionB Condition) bool {
     return true
 }
 
-
+func (condition conditionSqlRow) conv() Condition {
+    return Condition{Text: condition.Field + " " + condition.Operator + " " + condition.Value, Type: condition.Type, Field: condition.Field, Operator: condition.Operator, Value: condition.Value}
+}
 
 
 
