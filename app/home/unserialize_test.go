@@ -22,8 +22,8 @@ func TestUnserializeRawTreeThreeNodeOneDepth(t *testing.T) {
     beforeEach("unserializeRaw")
 
     in := []conditionSqlRow{
-        conditionSqlRow{Type: "equality", Field: "age", Operator: "eq", Value: "81", Left: 2, Right: 3},
         conditionSqlRow{Type: "logic", Operator: "AND", Left: 1, Right: 6},
+        conditionSqlRow{Type: "equality", Field: "age", Operator: "eq", Value: "81", Left: 2, Right: 3},
         conditionSqlRow{Type: "equality", Field: "age", Operator: "eq", Value: "27", Left: 4, Right: 5},
     }
 

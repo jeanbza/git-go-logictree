@@ -170,6 +170,12 @@ func unserializeFormattedTree(conditions []Condition) (*treeNode, error) {
     return root.Children[0], nil
 }
 
+func unserializeRawTree(conditions []conditionSqlRow) *treeNode {
+    conditionsToReturn, _ := unserializeRawTreeRecursively(conditions)
+
+    return conditionsToReturn
+}
+
 /**
  * Assumption: data should be ordered by LEFT
  * Recursive steps:
@@ -182,9 +188,12 @@ func unserializeFormattedTree(conditions []Condition) (*treeNode, error) {
  *      Pop item from conditions
  * Return node
 **/
-func unserializeRawTree(conditions []conditionSqlRow) *treeNode {
+func unserializeRawTreeRecursively(conditions []conditionSqlRow) (*treeNode, []conditionSqlRow) {
     var condition conditionSqlRow
+    var node *treeNode
     root := &treeNode{}
+
+    // PROBLEM: How to add children recursively
 
     for 0 < len(conditions) {
         // Pop the front item from the slice
@@ -193,14 +202,16 @@ func unserializeRawTree(conditions []conditionSqlRow) *treeNode {
 
         root.Node = condition.conv()
 
-        if condition.Left == condition.Right-1 {
-            // root.Children = append(root.Children, unserializeRawTree(conditions))
+        if condition.Left != condition.Right-1 {
+            node, conditions = unserializeRawTreeRecursively(conditions)
+            root.Children = append(root.Children, node)
         } else {
-            return root
+            fmt.Println("BAM")
+            return root, conditions
         }
     }
 
-    return root
+    return root, conditions
 }
 
 func serializeTree(node *treeNode) ([]Condition, error) {
