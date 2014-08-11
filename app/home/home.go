@@ -186,8 +186,6 @@ func unserializeRawTree(conditions []conditionSqlRow) *treeNode {
     var condition conditionSqlRow
     root := &treeNode{}
 
-    fmt.Println(conditions)
-
     for 0 < len(conditions) {
         // Pop the front item from the slice
         condition = conditions[0]
@@ -196,10 +194,8 @@ func unserializeRawTree(conditions []conditionSqlRow) *treeNode {
         root.Node = condition.conv()
 
         if condition.Left == condition.Right-1 {
-            fmt.Println("YES ",condition)
             // root.Children = append(root.Children, unserializeRawTree(conditions))
         } else {
-            fmt.Println("NO ",condition)
             return root
         }
     }

@@ -4,6 +4,19 @@ import (
     "testing"
 )
 
+// UnserializeRaw SINGLE NODE: It should be able to unserialize raw a tree with only one node
+func TestUnserializeRawTreeOneNodeZeroDepth(t *testing.T) {
+    beforeEach("unserializeRaw")
+
+    in := []conditionSqlRow{conditionSqlRow{Type: "equality", Field: "age", Operator: "eq", Value: "5", Left: 1, Right: 2}}
+    expectedOut := &treeNode{Parent: nil, Children: nil, Node: Condition{Text: "age eq 5", Type: "equality", Field: "age", Operator: "eq", Value: "5"}}
+    treeReturned := unserializeRawTree(in)
+
+    if !treeReturned.matches(expectedOut) {
+        t.Errorf("unserializeFormattedTree(%v) - got %v, want %v", in, treeReturned, expectedOut)
+    }
+}
+
 // UnserializeFormatted SINGLE NODE: It should be able to unserializeFormatted a tree with only one node
 func TestUnserializeFormattedTreeOneNodeZeroDepth(t *testing.T) {
     beforeEach("unserializeFormatted")
