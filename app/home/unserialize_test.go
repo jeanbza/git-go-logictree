@@ -4,7 +4,7 @@ import (
     "testing"
 )
 
-// UnserializeRaw SINGLE NODE: It should be able to unserialize raw a tree with only one node
+// UnserializeRaw SINGLE NODE: It should be able to unserialize a tree with only one node
 func TestUnserializeRawTreeOneNodeZeroDepth(t *testing.T) {
     beforeEach("unserializeRaw")
 
@@ -17,7 +17,29 @@ func TestUnserializeRawTreeOneNodeZeroDepth(t *testing.T) {
     }
 }
 
-// UnserializeFormatted SINGLE NODE: It should be able to unserializeFormatted a tree with only one node
+// UnserializeRaw SINGLE DEPTH, NON-ENCLOSURE: It should be able to unserialize a tree with multiple nodes on one branch
+func TestUnserializeRawTreeThreeNodeOneDepth(t *testing.T) {
+    beforeEach("unserializeRaw")
+
+    in := []conditionSqlRow{
+        conditionSqlRow{Type: "equality", Field: "age", Operator: "eq", Value: "81", Left: 2, Right: 3},
+        conditionSqlRow{Type: "logic", Operator: "AND", Left: 1, Right: 6},
+        conditionSqlRow{Type: "equality", Field: "age", Operator: "eq", Value: "27", Left: 4, Right: 5},
+    }
+
+    expectedOut := &treeNode{Parent: nil, Children: nil, Node: Condition{Text: "AND", Type: "logic", Operator: "AND"}}
+    child1 := treeNode{Parent: expectedOut, Children: nil, Node: Condition{Text: "age eq 81", Type: "equality", Field: "age", Operator: "eq", Value: "81"}}
+    child2 := treeNode{Parent: expectedOut, Children: nil, Node: Condition{Text: "age eq 27", Type: "equality", Field: "age", Operator: "eq", Value: "27"}}
+    expectedOut.Children = []*treeNode{&child1, &child2}
+
+    treeReturned := unserializeRawTree(in)
+
+    if !treeReturned.matches(expectedOut) {
+        t.Errorf("unserializeFormattedTree(%v) - got %v, want %v", in, treeReturned.print(), expectedOut.print())
+    }
+}
+
+// UnserializeFormatted SINGLE NODE: It should be able to unserialize a tree with only one node
 func TestUnserializeFormattedTreeOneNodeZeroDepth(t *testing.T) {
     beforeEach("unserializeFormatted")
 
@@ -36,7 +58,7 @@ func TestUnserializeFormattedTreeOneNodeZeroDepth(t *testing.T) {
     }
 }
 
-// unserializeFormatted SINGLE DEPTH, NON-ENCLOSURE: It should be able to unserializeFormatted a tree with multiple nodes on one branch
+// unserializeFormatted SINGLE DEPTH, NON-ENCLOSURE: It should be able to unserialize a tree with multiple nodes on one branch
 func TestUnserializeFormattedTreeThreeNodeOneDepth(t *testing.T) {
     beforeEach("unserializeFormatted")
 
@@ -63,7 +85,7 @@ func TestUnserializeFormattedTreeThreeNodeOneDepth(t *testing.T) {
     }
 }
 
-// UnserializeFormatted SINGLE DEPTH, ENCLOSURE: It should be able to unserializeFormatted a tree with a node and two children
+// UnserializeFormatted SINGLE DEPTH, ENCLOSURE: It should be able to unserialize a tree with a node and two children
 /**
  * A && B
  *      AND
@@ -97,7 +119,7 @@ func TestUnserializeFormattedTreeThreeNodeOneDepthEnclosure(t *testing.T) {
     }
 }
 
-// UnserializeFormatted ORDER, ARBITRARY DEPTH: It should be able to unserializeFormatted a tree with nine nodes and four levels of depth (aka, arbitrary depth) in the correct order
+// UnserializeFormatted ORDER, ARBITRARY DEPTH: It should be able to unserialize a tree with nine nodes and four levels of depth (aka, arbitrary depth) in the correct order
 // /**
 //  * ((A && B) || C) && (D || E)
 //  *             AND
