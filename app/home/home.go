@@ -185,17 +185,22 @@ func unserializeFormattedTree(conditions []Condition) (*treeNode, error) {
 func unserializeRawTree(conditions []conditionSqlRow) *treeNode {
     var condition conditionSqlRow
     root := &treeNode{}
-    key := 0
 
-    for key < len(conditions) {
+    fmt.Println(conditions)
+
+    for 0 < len(conditions) {
         // Pop the front item from the slice
         condition = conditions[0]
-        conditions = append(conditions[:key], conditions[key+1:]...)
+        conditions = conditions[1:len(conditions)]
 
-        (*root).Node = condition.conv()
+        root.Node = condition.conv()
 
         if condition.Left == condition.Right-1 {
-            (*root).Children = append((*root).Children, unserializeRawTree(conditions))
+            fmt.Println("YES ",condition)
+            // root.Children = append(root.Children, unserializeRawTree(conditions))
+        } else {
+            fmt.Println("NO ",condition)
+            return root
         }
     }
 
