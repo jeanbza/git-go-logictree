@@ -201,11 +201,12 @@ func unserializeRawTreeRecursively(conditions []conditionSqlRow) (*treeNode, []c
         conditions = conditions[1:len(conditions)]
 
         root.Node = condition.conv()
+        root.Left = condition.Left
+        root.Right = condition.Right
 
         if condition.Left != condition.Right-1 {
             // Has children
             node, conditions = unserializeRawTreeRecursively(conditions)
-            fmt.Println(node)
             for node.Left == node.Right-1 {
                 root.Children = append(root.Children, node)
                 node, conditions = unserializeRawTreeRecursively(conditions)

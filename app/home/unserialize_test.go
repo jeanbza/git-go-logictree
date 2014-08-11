@@ -27,9 +27,9 @@ func TestUnserializeRawTreeThreeNodeOneDepth(t *testing.T) {
         conditionSqlRow{Type: "equality", Field: "age", Operator: "eq", Value: "27", Left: 4, Right: 5},
     }
 
-    expectedOut := &treeNode{Parent: nil, Children: nil, Node: Condition{Text: "AND", Type: "logic", Operator: "AND"}}
-    child1 := treeNode{Parent: expectedOut, Children: nil, Node: Condition{Text: "age eq 81", Type: "equality", Field: "age", Operator: "eq", Value: "81"}}
-    child2 := treeNode{Parent: expectedOut, Children: nil, Node: Condition{Text: "age eq 27", Type: "equality", Field: "age", Operator: "eq", Value: "27"}}
+    expectedOut := &treeNode{Parent: nil, Children: nil, Node: Condition{Text: "AND", Type: "logic", Operator: "AND"}, Left: 1, Right: 6}
+    child1 := treeNode{Parent: expectedOut, Children: nil, Node: Condition{Text: "age eq 81", Type: "equality", Field: "age", Operator: "eq", Value: "81"}, Left: 2, Right: 3}
+    child2 := treeNode{Parent: expectedOut, Children: nil, Node: Condition{Text: "age eq 27", Type: "equality", Field: "age", Operator: "eq", Value: "27"}, Left: 4, Right: 5}
     expectedOut.Children = []*treeNode{&child1, &child2}
 
     treeReturned := unserializeRawTree(in)
