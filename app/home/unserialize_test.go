@@ -45,6 +45,8 @@ func TestUnserializeRawTreeArbitraryWidth(t *testing.T) {
 
     treeReturned := unserializeRawTree(testingMysqlRows)
 
+    testingTreeRoot.attachLeftsAndRights()
+
     if !treeReturned.matches(testingTreeRoot) {
         t.Errorf("unserializeFormattedTree(%v) - got %v, want %v", testingMysqlRows, treeReturned.print(), testingTreeRoot.print())
     }
