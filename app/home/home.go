@@ -48,7 +48,6 @@ func UpdateConditions(rw http.ResponseWriter, req *http.Request) {
     conditions := req.FormValue("conditions");
 
     parsedConditions, _ := parseJSON(conditions);
-    fmt.Println(parsedConditions)
     treeRoot, err := unserializeFormattedTree(parsedConditions)
 
     equalityStr, logicStr, err := treeRoot.toMysql()
@@ -388,7 +387,14 @@ func (conditionA Condition) matches(conditionB Condition) bool {
 }
 
 func (condition conditionSqlRow) conv() Condition {
-    return Condition{Text: condition.Field + " " + condition.Operator + " " + condition.Value, Type: condition.Type, Field: condition.Field, Operator: condition.Operator, Value: condition.Value}
+    switch condition.Type {
+    case "logic":
+        return Condition{Text: condition.Operator, Type: condition.Type, Field: condition.Field, Operator: condition.Operator, Value: condition.Value}
+    case "equality":
+        return Condition{Text: condition.Field + " " + condition.Operator + " " + condition.Value, Type: condition.Type, Field: condition.Field, Operator: condition.Operator, Value: condition.Value}
+    }
+
+    return Condition{}
 }
 
 
