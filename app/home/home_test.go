@@ -8,7 +8,7 @@ import (
 var testingTreeRoot *treeNode
 var testingConditions []Condition
 var testingJSON, testingMysqlEqualityInput, testingMysqlLogicInput string
-var testingMysqlOutput []conditionSqlRow
+var testingMysqlRows []conditionSqlRow
 
 // Fullstack test: given some conditions in JSON, we should be able to parse to condition slice, serialize
 // to a tree, attach lefts and rights, and finally convert to mysql value rows to be inserted
@@ -331,7 +331,7 @@ func beforeEach(testName string) {
     // INSERT INTO logictree.logic (operator, lt, rt) VALUES ...
     testingMysqlLogicInput = "('AND', 'logic', 3, 14),('OR', 'logic', 2, 17),('OR', 'logic', 18, 23),('AND', 'logic', 1, 24)"
 
-    testingMysqlOutput = []conditionSqlRow{
+    testingMysqlRows = []conditionSqlRow{
         conditionSqlRow{Operator: "AND", Type: "logic", Left: 1, Right: 24},
         conditionSqlRow{Operator: "OR", Type: "logic", Left: 2, Right: 17},
         conditionSqlRow{Operator: "AND", Type: "logic", Left: 3, Right: 14},

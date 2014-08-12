@@ -39,6 +39,17 @@ func TestUnserializeRawTreeThreeNodeOneDepth(t *testing.T) {
     }
 }
 
+// UnserializeRaw ARBITRARY WIDTH: It should be able to unserialize a tree with any amount of children on a branch
+func TestUnserializeRawTreeArbitraryWidth(t *testing.T) {
+    beforeEach("unserializeFormatted")
+
+    treeReturned := unserializeRawTree(testingMysqlRows)
+
+    if !treeReturned.matches(testingTreeRoot) {
+        t.Errorf("unserializeFormattedTree(%v) - got %v, want %v", testingMysqlRows, treeReturned.print(), testingTreeRoot.print())
+    }
+}
+
 // UnserializeFormatted SINGLE NODE: It should be able to unserialize a tree with only one node
 func TestUnserializeFormattedTreeOneNodeZeroDepth(t *testing.T) {
     beforeEach("unserializeFormatted")
@@ -180,7 +191,7 @@ func TestUnserializeFormattedTreeArbitraryDepth(t *testing.T) {
     }
 }
 
-// UnserializeFormatted ARBITRARY WIDTH: It should be able to serialize a tree with any amount of children on a branch
+// UnserializeFormatted ARBITRARY WIDTH: It should be able to unserialize a tree with any amount of children on a branch
 func TestUnserializeFormattedTreeArbitraryWidth(t *testing.T) {
     beforeEach("unserializeFormatted")
 
