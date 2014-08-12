@@ -1,7 +1,6 @@
 package home
 
 import (
-    "database/sql"
     "errors"
     "fmt"
     "git-go-logictree/app/common"
@@ -45,14 +44,47 @@ func (t *treeNode) toMysqlRecursively() (equalityStr, logicStr string) {
 }
 
 func updateDatabase(equalityStr, logicStr string) {
-    db, _ := sql.Open("mysql", "root:@/")
-    defer db.Close()
-
-    _, err := db.Query("TRUNCATE TABLE logictree.conditions")
+    _, err := common.DB.Query("TRUNCATE TABLE logictree.conditions")
     common.CheckError(err, 2)
 
-    _, err = db.Query("INSERT INTO logictree.conditions (field, operator, value, type, lt, rt) VALUES "+equalityStr)
+    _, err = common.DB.Query("INSERT INTO logictree.conditions (field, operator, value, type, lt, rt) VALUES "+equalityStr)
     common.CheckError(err, 2)
-    _, err = db.Query("INSERT INTO logictree.conditions (operator, type, lt, rt) VALUES "+logicStr)
+    _, err = common.DB.Query("INSERT INTO logictree.conditions (operator, type, lt, rt) VALUES "+logicStr)
     common.CheckError(err, 2)
+}
+
+func getConditions() []Condition {
+    conditions := make([]Condition, 0)
+
+    rows, err := common.DB.Query("SELECT field, operator, value FROM logictree.equality")
+    common.CheckError(err, 2)
+
+    var field, operator, value string
+
+    i := 0
+
+    for rows.Next() {
+        rows.Scan(&field, &operator, &value)
+        common.CheckError(err, 2)
+
+        if i != 0 {
+            conditions = append(conditions, Condition{
+                Text: "AND",
+                Operator: "AND",
+                Type: "logic",
+            })
+        }
+
+        conditions = append(conditions, Condition{
+            Text: fmt.Sprintf("%s %s %s", field, operator, value),
+            Type: "equality",
+            Field: field,
+            Operator: operator,
+            Value: value,
+        })
+
+        i++
+    }
+
+    return conditions
 }

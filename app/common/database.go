@@ -11,6 +11,5 @@ func init() {
     DB, _ = sql.Open("mysql", "root:@/")
 
     DB.Query("CREATE DATABASE logictree")
-    DB.Query("CREATE TABLE IF NOT EXISTS logictree.equality (field VARCHAR(255), operator VARCHAR(3), value VARCHAR(255)")
-    DB.Query("CREATE TABLE IF NOT EXISTS logictree.logic (operator VARCHAR(3))")
+    DB.Query("CREATE TABLE IF NOT EXISTS logictree.conditions (field VARCHAR(255), operator VARCHAR(3), value VARCHAR(255), type VARCHAR(255), left INT(11), right INT(11)")
 }

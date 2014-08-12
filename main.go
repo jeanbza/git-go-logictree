@@ -17,6 +17,7 @@ var router *mux.Router
 func main() {
     flag.Parse()
     defer glog.Flush()
+    defer common.DB.close()
 
     router = mux.NewRouter()
     http.HandleFunc("/", httpInterceptor)

@@ -67,42 +67,6 @@ func Truncate(rw http.ResponseWriter, req *http.Request) {
     GetHomePage(rw, req)
 }
 
-func getConditions() []Condition {
-    conditions := make([]Condition, 0)
-
-    rows, err := common.DB.Query("SELECT field, operator, value FROM logictree.equality")
-    common.CheckError(err, 2)
-
-    var field, operator, value string
-
-    i := 0
-
-    for rows.Next() {
-        rows.Scan(&field, &operator, &value)
-        common.CheckError(err, 2)
-
-        if i != 0 {
-            conditions = append(conditions, Condition{
-                Text: "AND",
-                Operator: "AND",
-                Type: "logic",
-            })
-        }
-
-        conditions = append(conditions, Condition{
-            Text: fmt.Sprintf("%s %s %s", field, operator, value),
-            Type: "equality",
-            Field: field,
-            Operator: operator,
-            Value: value,
-        })
-
-        i++
-    }
-
-    return conditions
-}
-
 
 
 
