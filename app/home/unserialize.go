@@ -1,5 +1,7 @@
 package home
 
+import "fmt"
+
 /** Treat conditions like a queue. Rules:
  * If you reach a (, pop the condition, drop down a depth and assign results to root's children
  * If you reach a ), pop the condition, pop back up a depth with the root
@@ -68,15 +70,53 @@ func unserializeRawTree(conditions []conditionSqlRow) *treeNode {
  *      Create node with it
  *      Pop item from conditions
  * Return node
+
+
+WRONG
+
+
+
+Iterate through conditions
+    If current node right is below stored node right
+        If current node is a branch
+            Store new node including left + right
+            Pop item from conditions
+            Apply following nodes as children
+        If node is a leaf
+            Pop item from conditions
+            Return to be added to children of stored node
+    If current node is above stored node right
+        Stored node becomes previously stored node
+        Apply conditions of part 1
+        
+
+
+RECURSIVELY:
+     
+     ?????
+     
+Iterate through conditions
+    If current node right is below stored node right
+        If current node is a branch
+            Store new node including left + right
+            Pop item from conditions
+            Apply following nodes as children
+        If node is a leaf
+            Pop item from conditions
+            Return to be added to children of stored node
+    If current node is above stored node right
+        Pop up a level
+        Do NOT pop item off conditions
+
 **/
 func unserializeRawTreeRecursively(conditions []conditionSqlRow) (*treeNode, []conditionSqlRow) {
     var condition conditionSqlRow
     var node *treeNode
+    fmt.Println("asdd")
     root := &treeNode{}
 
-    // PROBLEM: How to add children recursively
-
-    for 0 < len(conditions) {
+    // for 0 < len(conditions) {
+    if len(conditions) > 0 {
         // Pop the front item from the slice
         condition = conditions[0]
         conditions = conditions[1:len(conditions)]
@@ -87,10 +127,16 @@ func unserializeRawTreeRecursively(conditions []conditionSqlRow) (*treeNode, []c
 
         if condition.Left != condition.Right-1 {
             // Has children
-            node, conditions = unserializeRawTreeRecursively(conditions)
-            for node.Left == node.Right-1 {
-                root.Children = append(root.Children, node)
+            once := false
+
+            // (the once is basically a do while)
+            for !once || node.Left == node.Right-1 {
+                once = true
                 node, conditions = unserializeRawTreeRecursively(conditions)
+                
+                if node.Left != 0 {
+                    root.Children = append(root.Children, node)
+                }
             }
         } else {
             // Has no children
@@ -100,3 +146,8 @@ func unserializeRawTreeRecursively(conditions []conditionSqlRow) (*treeNode, []c
 
     return root, conditions
 }
+
+
+
+
+
