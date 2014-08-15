@@ -49,6 +49,7 @@ func UpdateConditions(rw http.ResponseWriter, req *http.Request) {
     conditions := req.FormValue("conditions");
 
     parsedConditions, _ := parseJSON(conditions);
+    fmt.Println(parsedConditions)
     treeRoot, err := unserializeFormattedTree(parsedConditions)
 
     equalityStr, logicStr, err := treeRoot.toMysql()

@@ -41,7 +41,7 @@
         equalityTemplate.attr("data-value", value);
         equalityTemplate.text(field+" "+operator+" "+value);
 
-        $("#sortable").append(logicTemplate).append(equalityTemplate);
+        $("#sortable .scope").last().before(logicTemplate).before(equalityTemplate);
 
         $("#value").val("");
     }
