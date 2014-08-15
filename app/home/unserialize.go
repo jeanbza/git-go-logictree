@@ -1,7 +1,5 @@
 package home
 
-import "fmt"
-
 /** Treat conditions like a queue. Rules:
  * If you reach a (, pop the condition, drop down a depth and assign results to root's children
  * If you reach a ), pop the condition, pop back up a depth with the root
@@ -77,16 +75,16 @@ WRONG
 
 
 Iterate through conditions
-    If current node right is below stored node right
+    If current node right is below stored node right OR stored node is not set
         If current node is a branch
-            Store new node including left + right
             Pop item from conditions
+            Store new node including left + right
             Apply following nodes as children
         If node is a leaf
             Pop item from conditions
-            Return to be added to children of stored node
+            Add to children of stored node
     If current node is above stored node right
-        Stored node becomes previously stored node
+        Pop all the way back up until we're under the right parent (aka, the parent's left and right encompasses this node)
         Apply conditions of part 1
         
 
@@ -94,7 +92,7 @@ Iterate through conditions
 RECURSIVELY:
      
      ?????
-     
+
 Iterate through conditions
     If current node right is below stored node right
         If current node is a branch
@@ -111,36 +109,32 @@ Iterate through conditions
 **/
 func unserializeRawTreeRecursively(conditions []conditionSqlRow) (*treeNode, []conditionSqlRow) {
     var condition conditionSqlRow
-    var node *treeNode
-    fmt.Println("asdd")
-    root := &treeNode{}
+    var node, root *treeNode
 
-    // for 0 < len(conditions) {
-    if len(conditions) > 0 {
+    for 0 < len(conditions) {
         // Pop the front item from the slice
         condition = conditions[0]
         conditions = conditions[1:len(conditions)]
 
-        root.Node = condition.conv()
-        root.Left = condition.Left
-        root.Right = condition.Right
-
-        if condition.Left != condition.Right-1 {
-            // Has children
-            once := false
-
-            // (the once is basically a do while)
-            for !once || node.Left == node.Right-1 {
-                once = true
-                node, conditions = unserializeRawTreeRecursively(conditions)
-                
-                if node.Left != 0 {
-                    root.Children = append(root.Children, node)
-                }
-            }
+        if root == nil {
+            // Root hasn't been set - let's do so now and move on immediately
+            root = &treeNode{Node: condition.conv(), Left: condition.Left, Right: condition.Right}
+            node = root
         } else {
-            // Has no children
-            return root, conditions
+            for condition.Left > node.Right {
+                // Current node is above stored node right - keep going up until
+                // we find the right parent. The right parent is the one whose left
+                // and right encompass this node's left and right
+                node = node.Parent
+            }
+
+            // Add this node as a child of the parent
+            node.Children = append(node.Children, &treeNode{Node: condition.conv(), Left: condition.Left, Right: condition.Right, Parent: node})
+
+            if node.Left != node.Right-1 {
+                // This node is a branch - set it as the current node (aka drill down a level)
+                node = node.Children[len(node.Children)-1]
+            }
         }
     }
 
