@@ -53,38 +53,20 @@ func updateDatabase(equalityStr, logicStr string) {
     common.CheckError(err, 2)
 }
 
-func getConditions() []Condition {
-    conditions := make([]Condition, 0)
+func getConditions() []conditionSqlRow {
+    var Field, Operator, Value, Type string
+    var Left, Right int
+    var conditionRowsReturned []conditionSqlRow
 
-    rows, err := common.DB.Query("SELECT field, operator, value FROM logictree.equality")
+    // Get equality sql rows
+    rows, err := common.DB.Query("SELECT COALESCE(field, ''), operator, COALESCE(value, ''), type, lt, rt FROM logictree.conditions ORDER BY lt")
     common.CheckError(err, 2)
-
-    var field, operator, value string
-
-    i := 0
+    defer rows.Close()
 
     for rows.Next() {
-        rows.Scan(&field, &operator, &value)
-        common.CheckError(err, 2)
-
-        if i != 0 {
-            conditions = append(conditions, Condition{
-                Text: "AND",
-                Operator: "AND",
-                Type: "logic",
-            })
-        }
-
-        conditions = append(conditions, Condition{
-            Text: fmt.Sprintf("%s %s %s", field, operator, value),
-            Type: "equality",
-            Field: field,
-            Operator: operator,
-            Value: value,
-        })
-
-        i++
+        rows.Scan(&Field, &Operator, &Value, &Type, &Left, &Right)
+        conditionRowsReturned = append(conditionRowsReturned, conditionSqlRow{Field: Field, Operator: Operator, Value: Value, Type: Type, Left: Left, Right: Right})
     }
 
-    return conditions
+    return conditionRowsReturned
 }

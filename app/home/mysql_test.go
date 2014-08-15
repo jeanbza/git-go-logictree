@@ -2,8 +2,7 @@ package home
 
 import (
     "testing"
-    "database/sql"
-    _ "github.com/go-sql-driver/mysql"
+    "git-go-logictree/app/common"
 )
 
 // ATTACH LEFTS AND RIGHTS TO TREE: It should be able to assign lefts and rights to a tree
@@ -67,15 +66,11 @@ func TestDatabaseAndBack(t *testing.T) {
     var Left, Right int
     var conditionRowsReturned []conditionSqlRow
 
-    db, _ := sql.Open("mysql", "root:@/")
-    defer db.Close()
-
     equalityStr, logicStr, _ := testingTreeRoot.toMysql()
     updateDatabase(equalityStr, logicStr)
 
     // Get equality sql rows
-    rows, _ := db.Query("SELECT COALESCE(field, ''), operator, COALESCE(value, ''), type, lt, rt FROM logictree.conditions ORDER BY lt")
-    defer rows.Close()
+    rows, _ := common.DB.Query("SELECT COALESCE(field, ''), operator, COALESCE(value, ''), type, lt, rt FROM logictree.conditions ORDER BY lt")
 
     for rows.Next() {
         rows.Scan(&Field, &Operator, &Value, &Type, &Left, &Right)

@@ -10,6 +10,9 @@ var DB *sql.DB
 func init() {
     DB, _ = sql.Open("mysql", "root:@/")
 
-    DB.Query("CREATE DATABASE logictree")
-    DB.Query("CREATE TABLE IF NOT EXISTS logictree.conditions (field VARCHAR(255), operator VARCHAR(3), value VARCHAR(255), type VARCHAR(255), left INT(11), right INT(11)")
+    _, err := DB.Query("CREATE DATABASE IF NOT EXISTS logictree")
+    CheckError(err, 3)
+
+    _, err = DB.Query("CREATE TABLE IF NOT EXISTS logictree.conditions (field VARCHAR(255), operator VARCHAR(3), value VARCHAR(255), type VARCHAR(255), lt INT(11), rt INT(11))")
+    CheckError(err, 3)
 }

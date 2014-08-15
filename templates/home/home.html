@@ -112,8 +112,14 @@
                     {{range .Conditions}}
                         {{if eq .Type "equality"}}
                             <li class="ui-state-default equality" data-type='{{.Type}}' data-field='{{.Field}}' data-operator='{{.Operator}}' data-value='{{.Value}}'>{{.Text}}</li>
-                        {{else}}
+                        {{end}}
+
+                        {{if eq .Type "logic"}}
                             <li class="ui-state-default logic" data-type='{{.Type}}' data-operator='{{.Operator}}'>{{.Text}}</li>
+                        {{end}}
+
+                        {{if eq .Type "scope"}}
+                            <li class="ui-state-default scope" data-type='{{.Type}}' data-operator='{{.Operator}}'>{{.Text}}</li>
                         {{end}}
                     {{end}}
                 </ul>
