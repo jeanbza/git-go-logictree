@@ -2,15 +2,18 @@ package home
 
 import (
     "testing"
+    "strings"
 )
 
 func TestParseTreeToJSON(t *testing.T) {
     beforeEach("json")
 
     jsonReturned := testingTreeRoot.toJSON()
+    trimmedReturned := strings.Replace(strings.Replace(jsonReturned, " ", "", -1), "\n", "", -1)
+    trimmedExpected := strings.Replace(strings.Replace(testingJSONTree, " ", "", -1), "\n", "", -1)
 
-    if jsonReturned != testingJSONTree {
-        t.Errorf("serializeTree(%v) conditionsReturned - got %v, want %v", testingTreeRoot, jsonReturned, testingJSONTree)
+    if trimmedReturned != trimmedExpected {
+        t.Errorf("serializeTree(%v) conditionsReturned - got %v, want %v", testingTreeRoot, trimmedReturned, trimmedExpected)
     }
 }
 

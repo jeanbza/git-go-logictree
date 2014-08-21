@@ -6,6 +6,39 @@ import (
 )
 
 func (t *treeNode) toJSON() string {
+    return "[" + t.toJSONRecursively() + "]"
+}
+
+func (t *treeNode) toJSONRecursively() string {
+    var childrenJSON string
+
+    for key, child := range t.Children {
+        if key != 0 {
+            childrenJSON += ","
+        }
+
+        childrenJSON += child.toJSONRecursively()
+    }
+
+    if childrenJSON != "" {
+        return fmt.Sprintf(`
+            {"name": "%s", "children": [%s]}
+        `, t.Node.textify(), childrenJSON)
+    } else {
+        return fmt.Sprintf(`
+            {"name": "%s"}
+        `, t.Node.textify())
+    }
+}
+
+func (c Condition) textify() string {
+    switch c.Type {
+    case "equality":
+        return c.Field + " " + c.Operator + " " + c.Value
+    case "logic":
+        return c.Operator
+    }
+
     return ""
 }
 
