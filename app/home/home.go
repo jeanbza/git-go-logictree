@@ -28,6 +28,7 @@ func GetHomePage(rw http.ResponseWriter, req *http.Request) {
     type Page struct {
         Title string
         Conditions []Condition
+        TreeJSON string
     }
 
     sqlConditions := getConditions()
@@ -38,6 +39,7 @@ func GetHomePage(rw http.ResponseWriter, req *http.Request) {
     p := Page{
         Title: "home",
         Conditions: formattedConditions,
+        TreeJSON: conditionsTree.toJSON(),
     }
 
     common.Templates = template.Must(template.ParseFiles("templates/home/home.html", common.LayoutPath))
