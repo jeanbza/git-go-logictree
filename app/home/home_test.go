@@ -7,7 +7,7 @@ import (
 
 var testingTreeRoot *treeNode
 var testingConditions []Condition
-var testingJSON, testingMysqlEqualityInput, testingMysqlLogicInput string
+var testingJSONFrontend, testingJSONTree, testingMysqlEqualityInput, testingMysqlLogicInput string
 var testingMysqlRows []conditionSqlRow
 
 // Fullstack test: given some conditions in JSON, we should be able to parse to condition slice, serialize
@@ -16,15 +16,15 @@ func TestFullstack(t *testing.T) {
     beforeEach("home")
 
     // Parse from json
-    conditionsReturned, errorsReturned := parseJSON(testingJSON)
+    conditionsReturned, errorsReturned := parseJSON(testingJSONFrontend)
 
     if !conditionsMatchesArray(conditionsReturned, testingConditions) {
-        t.Errorf("parseJSON(%v) conditionsReturned - got %v, want %v", testingJSON, conditionsReturned, testingConditions)
+        t.Errorf("parseJSON(%v) conditionsReturned - got %v, want %v", testingJSONFrontend, conditionsReturned, testingConditions)
     }
 
     var expectedOutErr error
     if errorsReturned != expectedOutErr {
-        t.Errorf("parseJSON(%v) errorsReturned - got %v, want %v", testingJSON, errorsReturned, expectedOutErr)
+        t.Errorf("parseJSON(%v) errorsReturned - got %v, want %v", testingJSONFrontend, errorsReturned, expectedOutErr)
     }
 
     // Because slices are pointers by default, and unserializeFormatted pops items, we shallow copy a new version for later use
@@ -90,48 +90,6 @@ func TestSerializationRoundtrip(t *testing.T) {
     }
 }
 
-func TestParseJSON(t *testing.T) {
-    beforeEach("home")
-
-    in := `
-        [
-            {
-                "Text": "age eq 8",
-                "Type": "equality",
-                "Field": "age",
-                "Operator": "eq",
-                "Value": "8"
-            },
-            {
-                "Text": "(",
-                "Type": "scope",
-                "Operator": "("
-            },
-            {
-                "Text": "AND",
-                "Type": "logic",
-                "Operator": "AND"
-            }
-        ]
-    `
-    expectedOut := []Condition{
-        Condition{Text: "(", Type: "scope", Operator: "("},
-        Condition{Text: "age eq 8", Type: "equality", Field: "age", Operator: "eq", Value: "8"},
-        Condition{Text: "AND", Type: "logic", Operator: "AND"},
-    }
-    var expectedOutErr error
-
-    conditionsReturned, errorsReturned := parseJSON(in)
-
-    if !conditionsMatchesArray(conditionsReturned, expectedOut) {
-        t.Errorf("parseJSON(%v) conditionsReturned - got %v, want %v", expectedOut, conditionsReturned, expectedOut)
-    }
-
-    if errorsReturned != expectedOutErr {
-        t.Errorf("parseJSON(%v) errorsReturned - got %v, want %v", expectedOut, errorsReturned, expectedOutErr)
-    }
-}
-
 func beforeEach(testName string) {
     fmt.Printf("Starting %s tests..\n", testName)
 
@@ -173,7 +131,40 @@ func beforeEach(testName string) {
     child11 := treeNode{Parent: &child3, Children: nil, Node: Condition{Text: "age eq 8", Type: "equality", Field: "age", Operator: "eq", Value: "8"}}
     child3.Children = []*treeNode{&child7, &child8, &child9, &child10, &child11}
 
-    testingJSON = `
+    testingJSONTree = `
+        [
+            {
+                "name": "AND",
+                "children": [
+                    {
+                        "name": "OR",
+                        "children": [
+                            {
+                                "name": "AND",
+                                "children": [
+                                    {"name": "age eq 4"},
+                                    {"name": "age eq 5"},
+                                    {"name": "age eq 6"},
+                                    {"name": "age eq 7"},
+                                    {"name": "age eq 8"}
+                                ]
+                            },
+                            {"name": "age eq 1"}
+                        ]
+                    },
+                    {
+                        "name": "OR",
+                        "children": [
+                            {"name": "age eq 2"},
+                            {"name": "age eq 3"}
+                        ]
+                    }
+                ]
+            }
+        ]
+    `
+
+    testingJSONFrontend = `
         [
             {"Text": "(", "Type": "scope", "Operator": "("},
             {"Text": "(", "Type": "scope", "Operator": "("},

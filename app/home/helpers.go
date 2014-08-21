@@ -5,6 +5,10 @@ import (
     "fmt"
 )
 
+func (t *treeNode) toJSON() string {
+    return ""
+}
+
 func parseJSON(conditionsString string) ([]Condition, error) {
     var conditionsSlice []Condition
     
