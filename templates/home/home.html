@@ -1,135 +1,46 @@
 {{define "body"}}
-    <style>
-  
-  .node {
-    cursor: pointer;
-  }
-
-  .node circle {
-    fill: #fff;
-    stroke: steelblue;
-    stroke-width: 3px;
-  }
-
-  .node text {
-    font: 12px sans-serif;
-  }
-
-  .link {
-    fill: none;
-    stroke: #ccc;
-    stroke-width: 2px;
-  }
-  
-    </style>
+    <script src="/static/js/external/d3/d3.v3.min.js"></script>
+    <script src="/static/js/conditions_tree.js"></script>
+    <script src="/static/js/app.js"></script>
 
     <script type="text/javascript">
-    function updateConditions() {
-        var conditions = [];
-        $("#sortable li").each(function(k, v) {
-            var condition = {
-                Type: $(v).attr("data-type"),
-                Text: $(v).text(),
-                Field: $(v).attr("data-field"),
-                Operator: $(v).attr("data-operator"),
-                Value: $(v).attr("data-value")
-            }
-
-            conditions.push(condition);
-        });
-
-        $.ajax({
-            url: "/updateConditions",
-            method: "POST",
-            data: {
-                conditions: JSON.stringify(conditions)
-            }
-        });
-    }
-
-    function addEquality() {
-        if (!$("#value").val()) {
-            return
-        }
-
-        var field = $("#field").val();
-        var operator = $("#operator").val();
-        var value = $("#value").val();
-
-        var logicTemplate = $("#sortable .logic").first().clone();
-        logicTemplate.text("AND");
-
-        var equalityTemplate = $("#sortable .equality").first().clone();
-        equalityTemplate.attr("data-field", field);
-        equalityTemplate.attr("data-operator", operator);
-        equalityTemplate.attr("data-value", value);
-        equalityTemplate.text(field+" "+operator+" "+value);
-
-        $("#sortable .scope").last().before(logicTemplate).before(equalityTemplate);
-
-        $("#value").val("");
-    }
-
-    $(document).ready(function() {
-        $("#addEquality").click(function(e) {
-            e.preventDefault();
-
-            addEquality();
-
-            equalities = [];
-
-            $("#sortable li").each(function(key, condition) {
-                if ($(condition).attr("data-type") == "equality") {
-                    var condition = {
-                        Field: $(condition).attr("data-field"),
-                        Operator: $(condition).attr("data-operator"),
-                        Value: $(condition).attr("data-value")
-                    }
-
-                    equalities.push(condition);
-                }
-            });
-
-            updateConditions();
-        });
-
-        $("#sortable").sortable({
-            change: function() {
-                updateConditions();
-            }
-        });
-        $("#sortable").disableSelection();
-    });
+        var treeData = JSON.parse('{{.TreeJSON}}');
+        $(document).ready(function() {
+            initTree(treeData);
+        })
     </script>
 
     <table class="main-table">
         <tr>
             <td>
-                <form id="addEquality" action="/save" method="post">
-                    Field:
-                    <select id="field" name="field">
-                        <option value="age">Age</option>
-                        <option value="pets"># Pets</option>
-                    </select>
-                    Operator:
-                    <select id="operator" name="operator">
-                        <option value="eq">=</option>
-                        <option value="ne">!=</option>
-                        <option value="gt">></option>
-                        <option value="lt"><</option>
-                    </select>
-                    Value: <input id="value" name="value"></input>
-                    <input type="submit">
+                <form id="addCondition" action="/save" method="post">
+                    <div>
+                        Field:
+                        <select id="field" name="field">
+                            <option value="age">Age</option>
+                            <option value="pets"># Pets</option>
+                        </select>
+                    </div>
+                    <div>
+                        Operator:
+                        <select id="operator" name="operator">
+                            <option value="eq">=</option>
+                            <option value="ne">!=</option>
+                            <option value="gt">></option>
+                            <option value="lt"><</option>
+                        </select>
+                    </div>
+                    <div>
+                        Value: <input id="value" name="value"></input>
+                    </div>
+                    </div>
+                        <input type="submit">
+                    </div>
                 </form>
             </td>
             <td>
-                two
-            </td>
-        </tr>
-        <tr>
-            <td>
                 <h4>Equality Conditions</h4>
-                <form action="truncate_equality" method="post">
+                <form action="truncate_conditions" method="post">
                     <input type="submit" value="Truncate">
                 </form>
                 <ul id="sortable">
@@ -148,142 +59,13 @@
                     {{end}}
                 </ul>
             </td>
+        </tr>
+        <tr>
             <td>
-                four
+                Three
+            </td>
+            <td class="d3-tree">
             </td>
         </tr>
     </table>
-
-    <script src="http://d3js.org/d3.v3.min.js"></script>
-
-    <script>
-var treeData = JSON.parse('{{.TreeJSON}}');
-
-    // ************** Generate the tree diagram  *****************
-var margin = {top: 20, right: 120, bottom: 20, left: 120},
-  width = 960 - margin.right - margin.left,
-  height = 500 - margin.top - margin.bottom;
-  
-var i = 0,
-  duration = 750,
-  root;
-
-var tree = d3.layout.tree()
-  .size([height, width]);
-
-var diagonal = d3.svg.diagonal()
-  .projection(function(d) { return [d.y, d.x]; });
-
-var svg = d3.select("body").append("svg")
-  .attr("width", width + margin.right + margin.left)
-  .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-root = treeData[0];
-root.x0 = height / 2;
-root.y0 = 0;
-  
-update(root);
-
-d3.select(self.frameElement).style("height", "500px");
-
-function update(source) {
-
-  // Compute the new tree layout.
-  var nodes = tree.nodes(root).reverse(),
-    links = tree.links(nodes);
-
-  // Normalize for fixed-depth.
-  nodes.forEach(function(d) { d.y = d.depth * 180; });
-
-  // Update the nodes…
-  var node = svg.selectAll("g.node")
-    .data(nodes, function(d) { return d.id || (d.id = ++i); });
-
-  // Enter any new nodes at the parent's previous position.
-  var nodeEnter = node.enter().append("g")
-    .attr("class", "node")
-    .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-    .on("click", click);
-
-  nodeEnter.append("circle")
-    .attr("r", 1e-6)
-    .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
-
-  nodeEnter.append("text")
-    .attr("x", function(d) { return d.children || d._children ? -13 : 13; })
-    .attr("dy", ".35em")
-    .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
-    .text(function(d) { return d.name; })
-    .style("fill-opacity", 1e-6);
-
-  // Transition nodes to their new position.
-  var nodeUpdate = node.transition()
-    .duration(duration)
-    .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
-
-  nodeUpdate.select("circle")
-    .attr("r", 10)
-    .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
-
-  nodeUpdate.select("text")
-    .style("fill-opacity", 1);
-
-  // Transition exiting nodes to the parent's new position.
-  var nodeExit = node.exit().transition()
-    .duration(duration)
-    .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
-    .remove();
-
-  nodeExit.select("circle")
-    .attr("r", 1e-6);
-
-  nodeExit.select("text")
-    .style("fill-opacity", 1e-6);
-
-  // Update the links…
-  var link = svg.selectAll("path.link")
-    .data(links, function(d) { return d.target.id; });
-
-  // Enter any new links at the parent's previous position.
-  link.enter().insert("path", "g")
-    .attr("class", "link")
-    .attr("d", function(d) {
-    var o = {x: source.x0, y: source.y0};
-    return diagonal({source: o, target: o});
-    });
-
-  // Transition links to their new position.
-  link.transition()
-    .duration(duration)
-    .attr("d", diagonal);
-
-  // Transition exiting nodes to the parent's new position.
-  link.exit().transition()
-    .duration(duration)
-    .attr("d", function(d) {
-    var o = {x: source.x, y: source.y};
-    return diagonal({source: o, target: o});
-    })
-    .remove();
-
-  // Stash the old positions for transition.
-  nodes.forEach(function(d) {
-  d.x0 = d.x;
-  d.y0 = d.y;
-  });
-}
-
-// Toggle children on click.
-function click(d) {
-  if (d.children) {
-  d._children = d.children;
-  d.children = null;
-  } else {
-  d.children = d._children;
-  d._children = null;
-  }
-  update(d);
-}</script>
 {{end}}
