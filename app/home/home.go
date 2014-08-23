@@ -47,11 +47,17 @@ func GetHomePage(rw http.ResponseWriter, req *http.Request) {
     common.CheckError(err, 2)
 }
 
+func DeleteConditions(rw http.ResponseWriter, req *http.Request) {
+    _, err := common.DB.Query("TRUNCATE TABLE logictree.conditions")
+    common.CheckError(err, 2)
+
+    http.Redirect(rw, req, "/", 103)
+}
+
 func UpdateConditions(rw http.ResponseWriter, req *http.Request) {
     conditions := req.FormValue("conditions");
 
     parsedConditions, _ := parseJSON(conditions);
-    fmt.Println(parsedConditions)
     treeRoot, err := unserializeFormattedTree(parsedConditions)
 
     equalityStr, logicStr, err := treeRoot.toMysql()
@@ -62,17 +68,7 @@ func UpdateConditions(rw http.ResponseWriter, req *http.Request) {
 
     updateDatabase(equalityStr, logicStr)
 
-    GetHomePage(rw, req)
-}
-
-func Truncate(rw http.ResponseWriter, req *http.Request) {
-    _, err := common.DB.Query("TRUNCATE TABLE logictree.equality")
-    common.CheckError(err, 2)
-
-    _, err = common.DB.Query("TRUNCATE TABLE logictree.logic")
-    common.CheckError(err, 2)
-
-    GetHomePage(rw, req)
+    http.Redirect(rw, req, "/", 103)
 }
 
 

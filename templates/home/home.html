@@ -7,13 +7,13 @@
         var treeData = JSON.parse('{{.TreeJSON}}');
         $(document).ready(function() {
             initTree(treeData);
-        })
+        });
     </script>
 
     <table class="main-table">
         <tr>
             <td>
-                <form id="addCondition" action="/save" method="post">
+                <form id="addCondition">
                     <div>
                         Field:
                         <select id="field" name="field">
@@ -40,9 +40,10 @@
             </td>
             <td>
                 <h4>Equality Conditions</h4>
-                <form action="truncate_conditions" method="post">
-                    <input type="submit" value="Truncate">
-                </form>
+                <div>
+                    <button id="deleteConditions">Truncate</button>
+                    <button id="updateConditions">Save Re-ordering</button>
+                </div>
                 <ul id="sortable">
                     {{range .Conditions}}
                         {{if eq .Type "equality"}}

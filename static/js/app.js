@@ -1,33 +1,22 @@
 $(document).ready(function() {
     $("#addCondition").click(function(e) {
         e.preventDefault();
-
         addCondition();
-
-        equalities = [];
-
-        $("#sortable li").each(function(key, condition) {
-            if ($(condition).attr("data-type") == "equality") {
-                var condition = {
-                    Field: $(condition).attr("data-field"),
-                    Operator: $(condition).attr("data-operator"),
-                    Value: $(condition).attr("data-value")
-                }
-
-                equalities.push(condition);
-            }
-        });
-
         updateConditions();
     });
 
-    $("#sortable").sortable({
-        change: function() {
-            updateConditions();
-        }
-    });
-    $("#sortable").disableSelection();
+    setupUpdateConditions();
+    setupDraggables();
 });
+
+function setupUpdateConditions() {
+    $("#updateConditions").click(updateConditions);
+}
+
+function setupDraggables() {
+    $("#sortable").sortable();
+    $("#sortable").disableSelection();
+}
 
 function updateConditions() {
     var conditions = [];
@@ -44,8 +33,8 @@ function updateConditions() {
     });
 
     $.ajax({
-        url: "/updateConditions",
-        method: "POST",
+        url: "/conditions",
+        method: "PUT",
         data: {
             conditions: JSON.stringify(conditions)
         }
