@@ -40,7 +40,7 @@
                 <button id="resetConditions">Reset Conditions</button>
             </td>
             <td>
-                <h4>Equality Conditions</h4>
+                <h4>Conditions (flat)</h4>
                 <div>
                     <button id="updateConditions">Save Re-ordering</button>
                 </div>
@@ -63,9 +63,30 @@
         </tr>
         <tr>
             <td>
-                Three
+                <h4>Conditions (mysql)</h4>
+                <table class="sql-rows">
+                    <thead>
+                        <tr>
+                            <th>Text</th>
+                            <th>Left</th>
+                            <th>Right</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .SqlRows}}
+                            <tr>
+                                <td>{{.Field}} {{.Operator}} {{.Value}}</td>
+                                <td>{{.Left}}</td>
+                                <td>{{.Right}}</td>
+                            </tr>
+                        {{end}}
+                    </tbody>
+                </table>
             </td>
-            <td id="d3-tree">
+            <td>
+                <h4>Conditions (tree)</h4>
+                <div id="d3-tree">
+                </div>
             </td>
         </tr>
     </table>

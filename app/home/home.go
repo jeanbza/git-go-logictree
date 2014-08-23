@@ -24,13 +24,13 @@ type conditionSqlRow struct {
     Left, Right int
 }
 
-func getFrontendJSON() (string, []Condition) {
+func getFrontendJSON() (string, []conditionSqlRow, []Condition) {
     sqlConditions := getConditions()
     conditionsTree := unserializeRawTree(sqlConditions)
     formattedConditions, err := serializeTree(conditionsTree)
     common.CheckError(err, 2)
 
-    return conditionsTree.toJSON(), formattedConditions
+    return conditionsTree.toJSON(), sqlConditions, formattedConditions
 }
 
 func GetHomePage(rw http.ResponseWriter, req *http.Request) {
@@ -38,14 +38,16 @@ func GetHomePage(rw http.ResponseWriter, req *http.Request) {
         Title string
         Conditions []Condition
         TreeJSON string
+        SqlRows []conditionSqlRow
     }
 
-    frontendJSON, formattedConditions := getFrontendJSON()
+    frontendJSON, conditionSqlRows, formattedConditions := getFrontendJSON()
     
     p := Page{
         Title: "home",
         Conditions: formattedConditions,
         TreeJSON: frontendJSON,
+        SqlRows: conditionSqlRows,
     }
 
     common.Templates = template.Must(template.ParseFiles("templates/home/home.html", common.LayoutPath))
@@ -58,7 +60,7 @@ func ResetConditions(rw http.ResponseWriter, req *http.Request) {
 
     updateDatabase(testingMysqlEqualityInput, testingMysqlLogicInput)
 
-    frontendJSON, _ := getFrontendJSON()
+    frontendJSON, _, _ := getFrontendJSON()
 
     rw.Write([]byte(frontendJSON))
 }
@@ -77,7 +79,7 @@ func UpdateConditions(rw http.ResponseWriter, req *http.Request) {
 
     updateDatabase(equalityStr, logicStr)
 
-    frontendJSON, _ := getFrontendJSON()
+    frontendJSON, _, _ := getFrontendJSON()
 
     rw.Write([]byte(frontendJSON))
 }

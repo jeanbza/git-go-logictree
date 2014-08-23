@@ -43,6 +43,7 @@ function redrawData(treeData) {
         success: function(data) {
             var pageData = $.parseHTML(data);
             $("#sortable").replaceWith($(pageData).find("#sortable"));
+            $(".sql-rows").replaceWith($(pageData).find(".sql-rows"));
             setupDraggables();
         }
     });
