@@ -1,13 +1,19 @@
 $(document).ready(function() {
-    $("#addCondition").click(function(e) {
+    $("#addCondition input[type='submit']").click(function(e) {
         e.preventDefault();
         addCondition();
         updateConditions();
+        setupDraggables();
     });
 
+    setupResetConditions();
     setupUpdateConditions();
     setupDraggables();
 });
+
+function setupResetConditions() {
+    $("#resetConditions").click(resetConditions);
+}
 
 function setupUpdateConditions() {
     $("#updateConditions").click(updateConditions);
@@ -16,6 +22,32 @@ function setupUpdateConditions() {
 function setupDraggables() {
     $("#sortable").sortable();
     $("#sortable").disableSelection();
+}
+
+function resetConditions() {
+    $.ajax({
+        url: "/reset",
+        method: "PUT",
+        cache: false,
+        success: function(data) {
+            redrawData(JSON.parse(data));
+        }
+    });
+}
+
+function redrawData(treeData) {
+    $.ajax({
+        url: "/",
+        method: "GET",
+        cache: false,
+        success: function(data) {
+            var pageData = $.parseHTML(data);
+            $("#sortable").replaceWith($(pageData).find("#sortable"));
+            setupDraggables();
+        }
+    });
+
+    initTree(treeData);
 }
 
 function updateConditions() {
@@ -37,6 +69,9 @@ function updateConditions() {
         method: "PUT",
         data: {
             conditions: JSON.stringify(conditions)
+        },
+        success: function(data) {
+            redrawData(JSON.parse(data));
         }
     });
 }

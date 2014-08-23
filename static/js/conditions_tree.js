@@ -1,4 +1,6 @@
 function initTree(treeData) {
+    document.getElementById("d3-tree").innerHTML = "";
+
     // ************** Generate the tree diagram  *****************
     var margin = {
             top: 20,
@@ -21,7 +23,7 @@ function initTree(treeData) {
             return [d.y, d.x];
         });
 
-    var svg = d3.select(".d3-tree").append("svg")
+    var svg = d3.select("#d3-tree").append("svg")
         .attr("width", width + margin.right + margin.left)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")

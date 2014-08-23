@@ -24,6 +24,15 @@ type conditionSqlRow struct {
     Left, Right int
 }
 
+func getFrontendJSON() (string, []Condition) {
+    sqlConditions := getConditions()
+    conditionsTree := unserializeRawTree(sqlConditions)
+    formattedConditions, err := serializeTree(conditionsTree)
+    common.CheckError(err, 2)
+
+    return conditionsTree.toJSON(), formattedConditions
+}
+
 func GetHomePage(rw http.ResponseWriter, req *http.Request) {
     type Page struct {
         Title string
@@ -31,27 +40,27 @@ func GetHomePage(rw http.ResponseWriter, req *http.Request) {
         TreeJSON string
     }
 
-    sqlConditions := getConditions()
-    conditionsTree := unserializeRawTree(sqlConditions)
-    formattedConditions, err := serializeTree(conditionsTree)
-    common.CheckError(err, 2)
+    frontendJSON, formattedConditions := getFrontendJSON()
     
     p := Page{
         Title: "home",
         Conditions: formattedConditions,
-        TreeJSON: conditionsTree.toJSON(),
+        TreeJSON: frontendJSON,
     }
 
     common.Templates = template.Must(template.ParseFiles("templates/home/home.html", common.LayoutPath))
-    err = common.Templates.ExecuteTemplate(rw, "base", p)
+    err := common.Templates.ExecuteTemplate(rw, "base", p)
     common.CheckError(err, 2)
 }
 
-func DeleteConditions(rw http.ResponseWriter, req *http.Request) {
-    _, err := common.DB.Query("TRUNCATE TABLE logictree.conditions")
-    common.CheckError(err, 2)
+func ResetConditions(rw http.ResponseWriter, req *http.Request) {
+    beforeEach("no")
 
-    http.Redirect(rw, req, "/", 103)
+    updateDatabase(testingMysqlEqualityInput, testingMysqlLogicInput)
+
+    frontendJSON, _ := getFrontendJSON()
+
+    rw.Write([]byte(frontendJSON))
 }
 
 func UpdateConditions(rw http.ResponseWriter, req *http.Request) {
@@ -68,7 +77,9 @@ func UpdateConditions(rw http.ResponseWriter, req *http.Request) {
 
     updateDatabase(equalityStr, logicStr)
 
-    http.Redirect(rw, req, "/", 103)
+    frontendJSON, _ := getFrontendJSON()
+
+    rw.Write([]byte(frontendJSON))
 }
 
 
