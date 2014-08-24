@@ -3,7 +3,7 @@ package home
 import (
     "errors"
     "fmt"
-    "git-go-logictree/app/common"
+    "github.com/jadekler/git-go-logictree/app/common"
 )
 
 func getUserSqlRows() []userSqlRow {

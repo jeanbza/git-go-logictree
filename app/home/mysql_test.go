@@ -2,7 +2,7 @@ package home
 
 import (
     "testing"
-    "git-go-logictree/app/common"
+    "github.com/jadekler/git-go-logictree/app/common"
 )
 
 // ATTACH LEFTS AND RIGHTS TO TREE: It should be able to assign lefts and rights to a tree
