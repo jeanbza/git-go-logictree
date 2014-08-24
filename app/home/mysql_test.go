@@ -67,7 +67,7 @@ func TestDatabaseAndBack(t *testing.T) {
     var conditionRowsReturned []conditionSqlRow
 
     equalityStr, logicStr, _ := testingTreeRoot.toMysql()
-    updateDatabase(equalityStr, logicStr)
+    updateDatabase(equalityStr, logicStr, "")
 
     // Get equality sql rows
     rows, _ := common.DB.Query("SELECT COALESCE(field, ''), operator, COALESCE(value, ''), type, lt, rt FROM logictree.conditions ORDER BY lt")

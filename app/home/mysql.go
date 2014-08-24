@@ -6,6 +6,24 @@ import (
     "git-go-logictree/app/common"
 )
 
+func getUserSqlRows() []userSqlRow {
+    var name string
+    var age, numPets int
+    var userRowsReturned []userSqlRow
+
+    // Get equality sql rows
+    rows, err := common.DB.Query("SELECT name, age, num_pets FROM logictree.users")
+    common.CheckError(err, 2)
+    defer rows.Close()
+
+    for rows.Next() {
+        rows.Scan(&name, &age, &numPets)
+        userRowsReturned = append(userRowsReturned, userSqlRow{Name: name, Age: age, NumPets: numPets})
+    }
+
+    return userRowsReturned
+}
+
 func (t *treeNode) toMysql() (equalityStr, logicStr string, err error) {
     t.attachLeftsAndRights()
 
@@ -43,14 +61,24 @@ func (t *treeNode) toMysqlRecursively() (equalityStr, logicStr string) {
     return equalityStr, logicStr
 }
 
-func updateDatabase(equalityStr, logicStr string) {
+func updateDatabase(equalityStr, logicStr, usersStr string) {
     _, err := common.DB.Query("TRUNCATE TABLE logictree.conditions")
     common.CheckError(err, 2)
 
-    _, err = common.DB.Query("INSERT INTO logictree.conditions (field, operator, value, type, lt, rt) VALUES "+equalityStr)
-    common.CheckError(err, 2)
-    _, err = common.DB.Query("INSERT INTO logictree.conditions (operator, type, lt, rt) VALUES "+logicStr)
-    common.CheckError(err, 2)
+    if equalityStr != "" {
+        _, err = common.DB.Query("INSERT INTO logictree.conditions (field, operator, value, type, lt, rt) VALUES "+equalityStr)
+        common.CheckError(err, 2)
+    }
+
+    if logicStr != "" {
+        _, err = common.DB.Query("INSERT INTO logictree.conditions (operator, type, lt, rt) VALUES "+logicStr)
+        common.CheckError(err, 2)
+    }
+
+    if usersStr != "" {
+        _, err = common.DB.Query("INSERT INTO logictree.users (name, age, num_pets) VALUES "+usersStr)
+        common.CheckError(err, 2)
+    }
 }
 
 func getConditions() []conditionSqlRow {

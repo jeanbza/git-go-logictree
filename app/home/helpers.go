@@ -7,7 +7,7 @@ import (
 
 var testingTreeRoot *treeNode
 var testingConditions []Condition
-var testingJSONFrontend, testingJSONTree, testingMysqlEqualityInput, testingMysqlLogicInput string
+var testingJSONFrontend, testingJSONTree, testingMysqlEqualityInput, testingMysqlLogicInput, testingMysqlUsersInput string
 var testingMysqlRows []conditionSqlRow
 
 func (t *treeNode) toJSON() string {
@@ -379,6 +379,14 @@ func beforeEach(testName string) {
     testingMysqlEqualityInput = "('age', 'eq', '4', 'equality', 4, 5),('age', 'eq', '5', 'equality', 6, 7),('age', 'eq', '6', 'equality', 8, 9),('age', 'eq', '7', 'equality', 10, 11),('age', 'eq', '8', 'equality', 12, 13),('age', 'eq', '1', 'equality', 15, 16),('age', 'eq', '2', 'equality', 19, 20),('age', 'eq', '3', 'equality', 21, 22)"
     // INSERT INTO logictree.logic (operator, lt, rt) VALUES ...
     testingMysqlLogicInput = "('AND', 'logic', 3, 14),('OR', 'logic', 2, 17),('OR', 'logic', 18, 23),('AND', 'logic', 1, 24)"
+    // INSERT INTO logictree.users (name, age, num_pets) VALUES ...
+    for i := 1; i < 500; i++ {
+        if i != 1 {
+            testingMysqlUsersInput += ","
+        }
+
+        testingMysqlUsersInput += fmt.Sprintf("('bob%d%d', %d, %d)", i, 312897%i, 9423821%i, 1098423%i)
+    }
 
     testingMysqlRows = []conditionSqlRow{
         conditionSqlRow{Operator: "AND", Type: "logic", Left: 1, Right: 24},

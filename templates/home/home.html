@@ -37,7 +37,7 @@
                         <input type="submit">
                     </div>
                 </form>
-                <button id="resetConditions">Reset Conditions</button>
+                <button id="resetConditions">Reset Everything</button>
             </td>
             <td>
                 <h4>Conditions (flat)</h4>
@@ -64,7 +64,7 @@
         <tr>
             <td>
                 <h4>Conditions (mysql)</h4>
-                <table class="sql-rows">
+                <table class="condition-sql-rows">
                     <thead>
                         <tr>
                             <th>Text</th>
@@ -73,7 +73,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {{range .SqlRows}}
+                        {{range .ConditionSqlRows}}
                             <tr>
                                 <td>{{.Field}} {{.Operator}} {{.Value}}</td>
                                 <td>{{.Left}}</td>
@@ -88,6 +88,30 @@
                 <div id="d3-tree">
                 </div>
             </td>
+        </tr>
+        <tr>
+            <td>
+                <h4>Users (mysql)</h4>
+                <table class="user-sql-rows">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th># Pets</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .UserSqlRows}}
+                            <tr>
+                                <td>{{.Name}}</td>
+                                <td>{{.Age}}</td>
+                                <td>{{.NumPets}}</td>
+                            </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </td>
+            <td>six</td>
         </tr>
     </table>
 {{end}}
