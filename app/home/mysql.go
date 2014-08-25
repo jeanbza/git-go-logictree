@@ -6,6 +6,10 @@ import (
     "github.com/jadekler/git-go-logictree/app/common"
 )
 
+func getMatchingUsers() []userSqlRow {
+    return nil
+}
+
 func getUserSqlRows() []userSqlRow {
     var name string
     var age, numPets int

@@ -196,6 +196,30 @@ func conditionSqlMatchesArray(rowsA, rowsB []conditionSqlRow) bool {
     return true
 }
 
+func usersMatchesArray(rowsA, rowsB []userSqlRow) bool {
+    var truth bool
+
+    if rowsA == nil || len(rowsA) != len(rowsB) {
+        return false
+    }
+
+    for _, valA := range rowsA {
+        truth = false
+
+        for _, valB := range rowsB {
+            if valA.matches(valB) {
+                truth = true
+            }
+        }
+
+        if !truth {
+            return false
+        }
+    }
+
+    return true
+}
+
 func (a conditionSqlRow) matches(b conditionSqlRow) bool {
     if a.Field != b.Field {
         return false
@@ -241,6 +265,22 @@ func (treeNodeA *treeNode) matches(treeNodeB *treeNode) bool {
     }
     
     if !treeNodeA.Node.matches(treeNodeB.Node) {
+        return false
+    }
+
+    return true
+}
+
+func (a userSqlRow) matches(b userSqlRow) bool {
+    if a.Name != b.Name {
+        return false
+    }
+
+    if a.Age != b.Age {
+        return false
+    }
+
+    if a.NumPets != b.NumPets {
         return false
     }
 
@@ -385,7 +425,7 @@ func beforeEach(testName string) {
             testingMysqlUsersInput += ","
         }
 
-        testingMysqlUsersInput += fmt.Sprintf("('bob%d%d', %d, %d)", i, 312897%i, 9423821%i, 1098423%i)
+        testingMysqlUsersInput += fmt.Sprintf("('bob%d', %d, %d)", i%312897, i%9423821, i%1098423)
     }
 
     testingMysqlRows = []conditionSqlRow{
