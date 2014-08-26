@@ -8,19 +8,18 @@ import (
 func TestConditionMatchingEqualitySimple(t *testing.T) {
     beforeEach("mysql")
 
-    var returnedusers []userSqlRow
-
     common.DB.Query("TRUNCATE TABLE logictree.conditions")
-    common.DB.Query("INSERT INTO TABLE logictree.conditions (field, operator, value, type, lt, rt) VALUES ('age', 'eq', 4, 'equality', 1, 2)")
+    common.DB.Query("INSERT INTO logictree.conditions (field, operator, value, type, lt, rt) VALUES ('age', 'eq', 4, 'equality', 1, 2)")
 
     common.DB.Query("TRUNCATE TABLE logictree.users")
-    common.DB.Query("INSERT INTO TABLE logictree.users (name, age, num_pets) VALUES ('bob', 4, 0), ('alex', 7, 4), ('sandra', 4, 1)")
+    common.DB.Query("INSERT INTO logictree.users (name, age, num_pets) VALUES ('bob', 4, 0), ('alex', 7, 4), ('sandra', 4, 1)")
 
-    returnedusers = getMatchingUsers()
+    var returnedUsers []userSqlRow
+    returnedUsers = getMatchingUsers()
     expectedUsers := []userSqlRow{userSqlRow{Name: "bob", Age: 4, NumPets: 0}, userSqlRow{Name: "sandra", Age: 4, NumPets: 1}}
 
-    if !usersMatchesArray(returnedusers, expectedUsers) {
-        t.Errorf("getMatchingUsers - got %v, want %v", returnedusers, expectedUsers)
+    if !usersMatchesArray(returnedUsers, expectedUsers) {
+        t.Errorf("getMatchingUsers - got %v, want %v", returnedUsers, expectedUsers)
     }
 }
 

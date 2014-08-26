@@ -7,7 +7,39 @@ import (
 )
 
 func getMatchingUsers() []userSqlRow {
-    return nil
+    conditions := getConditions()
+
+    sql := "SELECT name, age, num_pets FROM logictree.users WHERE "
+
+    for key, condition := range conditions {
+        if key != 0 {
+            sql += " AND "
+        }
+
+        sql += condition.Field + " "
+
+        switch condition.Operator {
+        case "eq":
+            sql += "="
+        }
+
+        sql += " " + condition.Value
+    }
+
+    var name string
+    var age, numPets int
+    var userRowsReturned []userSqlRow
+
+    rows, err := common.DB.Query(sql)
+    common.CheckError(err, 2)
+    defer rows.Close()
+
+    for rows.Next() {
+        rows.Scan(&name, &age, &numPets)
+        userRowsReturned = append(userRowsReturned, userSqlRow{Name: name, Age: age, NumPets: numPets})
+    }
+
+    return userRowsReturned
 }
 
 func getUserSqlRows() []userSqlRow {
@@ -67,6 +99,9 @@ func (t *treeNode) toMysqlRecursively() (equalityStr, logicStr string) {
 
 func updateDatabase(equalityStr, logicStr, usersStr string) {
     _, err := common.DB.Query("TRUNCATE TABLE logictree.conditions")
+    common.CheckError(err, 2)
+
+    _, err = common.DB.Query("TRUNCATE TABLE logictree.users")
     common.CheckError(err, 2)
 
     if equalityStr != "" {

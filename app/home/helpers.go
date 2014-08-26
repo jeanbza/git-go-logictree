@@ -420,12 +420,13 @@ func beforeEach(testName string) {
     // INSERT INTO logictree.logic (operator, lt, rt) VALUES ...
     testingMysqlLogicInput = "('AND', 'logic', 3, 14),('OR', 'logic', 2, 17),('OR', 'logic', 18, 23),('AND', 'logic', 1, 24)"
     // INSERT INTO logictree.users (name, age, num_pets) VALUES ...
+    testingMysqlUsersInput = ""
     for i := 1; i < 500; i++ {
         if i != 1 {
             testingMysqlUsersInput += ","
         }
 
-        testingMysqlUsersInput += fmt.Sprintf("('bob%d', %d, %d)", i%312897, i%9423821, i%1098423)
+        testingMysqlUsersInput += fmt.Sprintf("('bob%d', %d, %d)", 5%i, 7%i, 9%i)
     }
 
     testingMysqlRows = []conditionSqlRow{
