@@ -6,7 +6,7 @@ import (
     "github.com/jadekler/git-go-logictree/app/common"
 )
 
-func getMatchingUsers() []userSqlRow {
+func getMatchingUsers() ([]userSqlRow, error) {
     conditions := getConditions()
 
     sql := "SELECT name, age, num_pets FROM logictree.users WHERE "
@@ -21,6 +21,12 @@ func getMatchingUsers() []userSqlRow {
         switch condition.Operator {
         case "eq":
             sql += "="
+        case "gt":
+            sql += ">"
+        case "lt":
+            sql += "<"
+        default:
+            return nil, errors.New("Error: your conditions contain an operator that isn't legit - " + condition.Operator)
         }
 
         sql += " " + condition.Value
@@ -39,7 +45,7 @@ func getMatchingUsers() []userSqlRow {
         userRowsReturned = append(userRowsReturned, userSqlRow{Name: name, Age: age, NumPets: numPets})
     }
 
-    return userRowsReturned
+    return userRowsReturned, nil
 }
 
 func getUserSqlRows() []userSqlRow {
