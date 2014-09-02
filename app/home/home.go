@@ -26,7 +26,7 @@ type conditionSqlRow struct {
 
 type userSqlRow struct {
     Name string
-    Age, NumPets int
+    Id, Age, NumPets int
 }
 
 func getFrontendJSON() (string, []conditionSqlRow, []Condition) {
@@ -60,6 +60,13 @@ func GetHomePage(rw http.ResponseWriter, req *http.Request) {
     common.Templates = template.Must(template.ParseFiles("templates/home/home.html", common.LayoutPath))
     err := common.Templates.ExecuteTemplate(rw, "base", p)
     common.CheckError(err, 2)
+}
+
+func GetMatchingUsers(rw http.ResponseWriter, req *http.Request) {
+    returnedUsers, _ := getMatchingUsers()
+    usersJSON := usersToJSON(returnedUsers)
+
+    rw.Write([]byte(usersJSON))
 }
 
 func ResetConditions(rw http.ResponseWriter, req *http.Request) {

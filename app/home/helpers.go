@@ -10,6 +10,22 @@ var testingConditions []Condition
 var testingJSONFrontend, testingJSONTree, testingMysqlEqualityInput, testingMysqlLogicInput, testingMysqlUsersInput, testingMysqlConditionsInput string
 var testingMysqlRows []conditionSqlRow
 
+func usersToJSON(users []userSqlRow) string {
+    json := "["
+
+    for key, user := range users {
+        if key != 0 {
+            json += ","
+        }
+
+        json += fmt.Sprintf("{Id: %d, Name: '%s', Age: %d, NumPets: %d}", user.Id, user.Name, user.Age, user.NumPets)
+    }
+
+    json += "]"
+
+    return json
+}
+
 func (t *treeNode) toJSON() string {
     return "[" + t.toJSONRecursively() + "]"
 }

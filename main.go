@@ -23,6 +23,7 @@ func main() {
     http.HandleFunc("/", httpInterceptor)
 
     router.HandleFunc("/", home.GetHomePage).Methods("GET")
+    router.HandleFunc("/matchingUsers", home.GetMatchingUsers).Methods("GET")
     router.HandleFunc("/conditions", home.UpdateConditions).Methods("PUT")
     router.HandleFunc("/reset", home.ResetConditions).Methods("PUT")
 

@@ -102,7 +102,7 @@
                     </thead>
                     <tbody>
                         {{range .UserSqlRows}}
-                            <tr>
+                            <tr id="{{.Id}}">
                                 <td>{{.Name}}</td>
                                 <td>{{.Age}}</td>
                                 <td>{{.NumPets}}</td>

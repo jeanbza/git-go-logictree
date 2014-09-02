@@ -16,10 +16,10 @@ func getMatchingUsers() ([]userSqlRow, error) {
         return nil, err
     }
 
-    sql := "SELECT name, age, num_pets FROM logictree.users WHERE " + conditionSql
+    sql := "SELECT id, name, age, num_pets FROM logictree.users WHERE " + conditionSql
 
     var name string
-    var age, numPets int
+    var id, age, numPets int
     var userRowsReturned []userSqlRow
 
     rows, err := common.DB.Query(sql)
@@ -27,8 +27,8 @@ func getMatchingUsers() ([]userSqlRow, error) {
     defer rows.Close()
 
     for rows.Next() {
-        rows.Scan(&name, &age, &numPets)
-        userRowsReturned = append(userRowsReturned, userSqlRow{Name: name, Age: age, NumPets: numPets})
+        rows.Scan(&id, &name, &age, &numPets)
+        userRowsReturned = append(userRowsReturned, userSqlRow{Id: id, Name: name, Age: age, NumPets: numPets})
     }
 
     return userRowsReturned, nil
@@ -106,17 +106,17 @@ func (c Condition) toMysql() (string, error) {
 
 func getUserSqlRows() []userSqlRow {
     var name string
-    var age, numPets int
+    var id, age, numPets int
     var userRowsReturned []userSqlRow
 
     // Get equality sql rows
-    rows, err := common.DB.Query("SELECT name, age, num_pets FROM logictree.users")
+    rows, err := common.DB.Query("SELECT id, name, age, num_pets FROM logictree.users")
     common.CheckError(err, 2)
     defer rows.Close()
 
     for rows.Next() {
-        rows.Scan(&name, &age, &numPets)
-        userRowsReturned = append(userRowsReturned, userSqlRow{Name: name, Age: age, NumPets: numPets})
+        rows.Scan(&id, &name, &age, &numPets)
+        userRowsReturned = append(userRowsReturned, userSqlRow{Id: id, Name: name, Age: age, NumPets: numPets})
     }
 
     return userRowsReturned
