@@ -12,7 +12,9 @@ $(document).ready(function() {
 });
 
 function setupResetConditions() {
-    $("#resetConditions").click(resetConditions);
+    $(".resetConditions").click(function() {
+        resetConditions($(this).attr('data-reset-type'));
+    });
 }
 
 function setupUpdateConditions() {
@@ -24,11 +26,14 @@ function setupDraggables() {
     $("#sortable").disableSelection();
 }
 
-function resetConditions() {
+function resetConditions(resetType) {
     $.ajax({
         url: "/reset",
         method: "PUT",
         cache: false,
+        data: {
+            resetType: resetType
+        },
         success: function(data) {
             redrawData(JSON.parse(data));
         }
