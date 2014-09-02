@@ -10,7 +10,7 @@ func TestTreeToConditionMysqlSingle(t *testing.T) {
 
     in := &treeNode{Parent: nil, Children: nil, Node: Condition{Text: "age eq 81", Type: "equality", Field: "age", Operator: "eq", Value: "81"}}
     expectedOut := "age = 81"
-    sqlReturned := in.toConditionMysql()
+    sqlReturned, _ := in.toConditionMysql()
 
     if sqlReturned != expectedOut {
         t.Errorf("%v.toConditionMysql() - got %v, want %v", in.print(), sqlReturned, expectedOut)
@@ -27,7 +27,7 @@ func TestTreeToConditionMysqlThreeWideOneDeep(t *testing.T) {
     in.Children = []*treeNode{&child1, &child2}
 
     expectedOut := "(age = 2 AND age = 3)"
-    sqlReturned := in.toConditionMysql()
+    sqlReturned, _ := in.toConditionMysql()
 
     if sqlReturned != expectedOut {
         t.Errorf("%v.toConditionMysql() - got %v, want %v", in.print(), sqlReturned, expectedOut)
@@ -37,33 +37,33 @@ func TestTreeToConditionMysqlThreeWideOneDeep(t *testing.T) {
 func TestTreeToConditionMysqlFull(t *testing.T) {
     beforeEach("mysql")
 
-    sqlReturned := testingTreeRoot.toConditionMysql()
+    sqlReturned, _ := testingTreeRoot.toConditionMysql()
 
     if sqlReturned != testingMysqlConditionsInput {
         t.Errorf("%v.toConditionMysql() - got %v, want %v", testingTreeRoot.print(), sqlReturned, testingMysqlConditionsInput)
     }
 }
 
-// func TestConditionMatchingErrorOperator(t *testing.T) {
-//     beforeEach("mysql")
+func TestConditionMatchingErrorOperator(t *testing.T) {
+    beforeEach("mysql")
 
-//     common.DB.Query("TRUNCATE TABLE logictree.conditions")
-//     common.DB.Query("INSERT INTO logictree.conditions (field, operator, value, type, lt, rt) VALUES ('age', 'ASD', 4, 'equality', 1, 2)")
+    common.DB.Query("TRUNCATE TABLE logictree.conditions")
+    common.DB.Query("INSERT INTO logictree.conditions (field, operator, value, type, lt, rt) VALUES ('age', 'ASD', 4, 'equality', 1, 2)")
 
-//     common.DB.Query("TRUNCATE TABLE logictree.users")
-//     common.DB.Query("INSERT INTO logictree.users (name, age, num_pets) VALUES ('bob', 4, 0), ('alex', 7, 4), ('sandra', 4, 1)")
+    common.DB.Query("TRUNCATE TABLE logictree.users")
+    common.DB.Query("INSERT INTO logictree.users (name, age, num_pets) VALUES ('bob', 4, 0), ('alex', 7, 4), ('sandra', 4, 1)")
 
-//     returnedUsers, returnedErr := getMatchingUsers()
-//     expectedError := "Error: your conditions contain an operator that isn't legit - ASD"
+    returnedUsers, returnedErr := getMatchingUsers()
+    expectedError := "Error: your conditions contain an operator that isn't legit - ASD"
 
-//     if returnedUsers != nil {
-//         t.Errorf("getMatchingUsers returnedUsers - got %v, want %v", returnedUsers, nil)
-//     }
+    if returnedUsers != nil {
+        t.Errorf("getMatchingUsers returnedUsers - got %v, want %v", returnedUsers, nil)
+    }
 
-//     if returnedErr.Error() != expectedError {
-//         t.Errorf("getMatchingUsers err - got %v, want %v", returnedErr.Error(), expectedError)
-//     }
-// }
+    if returnedErr.Error() != expectedError {
+        t.Errorf("getMatchingUsers err - got %v, want %v", returnedErr.Error(), expectedError)
+    }
+}
 
 func TestConditionMatchingSingle(t *testing.T) {
     beforeEach("mysql")

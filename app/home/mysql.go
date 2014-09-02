@@ -10,7 +10,13 @@ func getMatchingUsers() ([]userSqlRow, error) {
     conditions := getConditions()
     tree := unserializeRawTree(conditions)
 
-    sql := "SELECT name, age, num_pets FROM logictree.users WHERE " + tree.toConditionMysql()
+    conditionSql, err := tree.toConditionMysql()
+
+    if err != nil {
+        return nil, err
+    }
+
+    sql := "SELECT name, age, num_pets FROM logictree.users WHERE " + conditionSql
 
     var name string
     var age, numPets int
@@ -29,12 +35,18 @@ func getMatchingUsers() ([]userSqlRow, error) {
 }
 
 // Used for condition matching only
-func (node *treeNode) toConditionMysql() string {
+func (node *treeNode) toConditionMysql() (string, error) {
     var sql, sqlSegment string
+    var err error
 
     if node.Parent == nil && (node.Children == nil || len(node.Children) == 0) {
         // Root is only node - add it
-        sqlSegment, _ = node.Node.toMysql()
+        sqlSegment, err = node.Node.toMysql()
+
+        if err != nil {
+            return "", err
+        }
+
         sql += sqlSegment
     }
 
@@ -48,10 +60,21 @@ func (node *treeNode) toConditionMysql() string {
         }
 
         if child.Children == nil || len(child.Children) == 0 {
-            sqlSegment, _ = child.Node.toMysql()
+            sqlSegment, err = child.Node.toMysql()
+
+            if err != nil {
+                return "", err
+            }
+
             sql += sqlSegment
         } else {
-            sql += child.toConditionMysql()
+            conditionSql, err := child.toConditionMysql()
+
+            if err != nil {
+                return "", err
+            }
+
+            sql += conditionSql
         }
 
         if key == len(node.Children)-1 {
@@ -59,7 +82,7 @@ func (node *treeNode) toConditionMysql() string {
         }
     }
 
-    return sql
+    return sql, nil
 }
 
 func (c Condition) toMysql() (string, error) {
