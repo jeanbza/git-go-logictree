@@ -65,23 +65,23 @@ func TestTreeToConditionMysqlFull(t *testing.T) {
 //     }
 // }
 
-// func TestConditionMatchingSingle(t *testing.T) {
-//     beforeEach("mysql")
+func TestConditionMatchingSingle(t *testing.T) {
+    beforeEach("mysql")
 
-//     common.DB.Query("TRUNCATE TABLE logictree.conditions")
-//     common.DB.Query("INSERT INTO logictree.conditions (field, operator, value, type, lt, rt) VALUES ('age', 'eq', 4, 'equality', 1, 2)")
+    common.DB.Query("TRUNCATE TABLE logictree.conditions")
+    common.DB.Query("INSERT INTO logictree.conditions (field, operator, value, type, lt, rt) VALUES ('age', 'eq', 4, 'equality', 1, 2)")
 
-//     common.DB.Query("TRUNCATE TABLE logictree.users")
-//     common.DB.Query("INSERT INTO logictree.users (name, age, num_pets) VALUES ('bob', 4, 0), ('alex', 7, 4), ('sandra', 4, 1)")
+    common.DB.Query("TRUNCATE TABLE logictree.users")
+    common.DB.Query("INSERT INTO logictree.users (name, age, num_pets) VALUES ('bob', 4, 0), ('alex', 7, 4), ('sandra', 4, 1)")
 
-//     var returnedUsers []userSqlRow
-//     returnedUsers, _ = getMatchingUsers()
-//     expectedUsers := []userSqlRow{userSqlRow{Name: "bob", Age: 4, NumPets: 0}, userSqlRow{Name: "sandra", Age: 4, NumPets: 1}}
+    var returnedUsers []userSqlRow
+    returnedUsers, _ = getMatchingUsers()
+    expectedUsers := []userSqlRow{userSqlRow{Name: "bob", Age: 4, NumPets: 0}, userSqlRow{Name: "sandra", Age: 4, NumPets: 1}}
 
-//     if !usersMatchesArray(returnedUsers, expectedUsers) {
-//         t.Errorf("getMatchingUsers - got %v, want %v", returnedUsers, expectedUsers)
-//     }
-// }
+    if !usersMatchesArray(returnedUsers, expectedUsers) {
+        t.Errorf("getMatchingUsers - got %v, want %v", returnedUsers, expectedUsers)
+    }
+}
 
 // func TestConditionMatchingThreeWideOneDeep(t *testing.T) {
 //     beforeEach("mysql")
