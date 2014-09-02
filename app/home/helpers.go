@@ -303,9 +303,9 @@ func beforeEach(testName string) {
     testingTreeRoot = &treeNode{Parent: nil, Children: nil, Node: Condition{Text: "AND", Type: "logic", Operator: "AND"}}
 
     // Row 2 node 1
-    child1 := treeNode{Parent: nil, Children: nil, Node: Condition{Text: "OR", Type: "logic", Operator: "OR"}}
+    child1 := treeNode{Parent: testingTreeRoot, Children: nil, Node: Condition{Text: "OR", Type: "logic", Operator: "OR"}}
     // Row 2 node 2
-    child2 := treeNode{Parent: nil, Children: nil, Node: Condition{Text: "OR", Type: "logic", Operator: "OR"}}
+    child2 := treeNode{Parent: testingTreeRoot, Children: nil, Node: Condition{Text: "OR", Type: "logic", Operator: "OR"}}
     testingTreeRoot.Children = []*treeNode{&child1, &child2}
 
     // Row 3 node 1
