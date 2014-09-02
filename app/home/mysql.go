@@ -8,29 +8,9 @@ import (
 
 func getMatchingUsers() ([]userSqlRow, error) {
     conditions := getConditions()
+    tree := unserializeRawTree(conditions)
 
-    sql := "SELECT name, age, num_pets FROM logictree.users WHERE "
-
-    for key, condition := range conditions {
-        if key != 0 {
-            sql += " AND "
-        }
-
-        sql += condition.Field + " "
-
-        switch condition.Operator {
-        case "eq":
-            sql += "="
-        case "gt":
-            sql += ">"
-        case "lt":
-            sql += "<"
-        default:
-            return nil, errors.New("Error: your conditions contain an operator that isn't legit - " + condition.Operator)
-        }
-
-        sql += " " + condition.Value
-    }
+    sql := "SELECT name, age, num_pets FROM logictree.users WHERE " + tree.toConditionMysql()
 
     var name string
     var age, numPets int
@@ -46,6 +26,51 @@ func getMatchingUsers() ([]userSqlRow, error) {
     }
 
     return userRowsReturned, nil
+}
+
+// Used for condition matching only
+func (node *treeNode) toConditionMysql() string {
+    var sql, sqlSegment string
+
+    if node.Parent == nil && (node.Children == nil || len(node.Children) == 0) {
+        // Root is only node - add it
+        sqlSegment, _ = node.Node.toMysql()
+        sql += sqlSegment
+    }
+
+    for key, child := range node.Children {
+        if key != 0 {
+            sql += " " + node.Parent.Node.Operator + " "
+        }
+
+        if child.Children == nil || len(child.Children) == 0 {
+            sqlSegment, _ = child.Node.toMysql()
+            sql += sqlSegment
+        } else {
+            sql += child.toConditionMysql()
+        }
+    }
+
+    return sql
+}
+
+func (c Condition) toMysql() (string, error) {
+    sql := c.Field + " "
+
+    switch c.Operator {
+    case "eq":
+        sql += "="
+    case "gt":
+        sql += ">"
+    case "lt":
+        sql += "<"
+    default:
+        return "", errors.New("Error: your conditions contain an operator that isn't legit - " + c.Operator)
+    }
+
+    sql += " " + c.Value
+
+    return sql, nil
 }
 
 func getUserSqlRows() []userSqlRow {
@@ -66,6 +91,7 @@ func getUserSqlRows() []userSqlRow {
     return userRowsReturned
 }
 
+// Used for inserts only
 func (t *treeNode) toMysql() (equalityStr, logicStr string, err error) {
     t.attachLeftsAndRights()
 
