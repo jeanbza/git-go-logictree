@@ -83,24 +83,24 @@ func TestConditionMatchingSingle(t *testing.T) {
     }
 }
 
-// func TestConditionMatchingThreeWideOneDeep(t *testing.T) {
-//     beforeEach("mysql")
+func TestConditionMatchingThreeWideOneDeep(t *testing.T) {
+    beforeEach("mysql")
 
-//     common.DB.Query("TRUNCATE TABLE logictree.conditions")
-//     common.DB.Query("INSERT INTO logictree.conditions (operator, type, lt, rt) VALUES ('AND', 'logic', 1, 8)")
-//     common.DB.Query("INSERT INTO logictree.conditions (field, operator, value, type, lt, rt) VALUES ('age', 'gt', 0, 'equality', 2, 3), ('age', 'gt', 3, 'equality', 4, 5), ('age', 'lt', 8, 'equality', 6, 7)")
+    common.DB.Query("TRUNCATE TABLE logictree.conditions")
+    common.DB.Query("INSERT INTO logictree.conditions (operator, type, lt, rt) VALUES ('AND', 'logic', 1, 8)")
+    common.DB.Query("INSERT INTO logictree.conditions (field, operator, value, type, lt, rt) VALUES ('age', 'gt', 0, 'equality', 2, 3), ('age', 'gt', 3, 'equality', 4, 5), ('age', 'lt', 8, 'equality', 6, 7)")
 
-//     common.DB.Query("TRUNCATE TABLE logictree.users")
-//     common.DB.Query("INSERT INTO logictree.users (name, age, num_pets) VALUES ('bob', 4, 0), ('alex', 7, 4), ('sandra', 4, 1), ('jordan', 10, 2)")
+    common.DB.Query("TRUNCATE TABLE logictree.users")
+    common.DB.Query("INSERT INTO logictree.users (name, age, num_pets) VALUES ('bob', 4, 0), ('alex', 7, 4), ('sandra', 4, 1), ('jordan', 10, 2)")
 
-//     var returnedUsers []userSqlRow
-//     returnedUsers, _ = getMatchingUsers()
-//     expectedUsers := []userSqlRow{userSqlRow{Name: "bob", Age: 4, NumPets: 0}, userSqlRow{Name: "alex", Age: 7, NumPets: 4}, userSqlRow{Name: "sandra", Age: 4, NumPets: 1}}
+    var returnedUsers []userSqlRow
+    returnedUsers, _ = getMatchingUsers()
+    expectedUsers := []userSqlRow{userSqlRow{Name: "bob", Age: 4, NumPets: 0}, userSqlRow{Name: "alex", Age: 7, NumPets: 4}, userSqlRow{Name: "sandra", Age: 4, NumPets: 1}}
 
-//     if !usersMatchesArray(returnedUsers, expectedUsers) {
-//         t.Errorf("getMatchingUsers - got %v, want %v", returnedUsers, expectedUsers)
-//     }
-// }
+    if !usersMatchesArray(returnedUsers, expectedUsers) {
+        t.Errorf("getMatchingUsers - got %v, want %v", returnedUsers, expectedUsers)
+    }
+}
 
 // ATTACH LEFTS AND RIGHTS TO TREE: It should be able to assign lefts and rights to a tree
 func TestAttachLeftsAndRights(t *testing.T) {
