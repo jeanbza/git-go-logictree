@@ -18,7 +18,7 @@ func usersToJSON(users []userSqlRow) string {
             json += ","
         }
 
-        json += fmt.Sprintf("{Id: %d, Name: '%s', Age: %d, NumPets: %d}", user.Id, user.Name, user.Age, user.NumPets)
+        json += fmt.Sprintf(`{"Id": %d, "Name": "%s", "Age": %d, "NumPets": %d}`, user.Id, user.Name, user.Age, user.NumPets)
     }
 
     json += "]"

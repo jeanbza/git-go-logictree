@@ -4,7 +4,8 @@
     <script src="/static/js/app.js"></script>
 
     <script type="text/javascript">
-        var treeData = JSON.parse('{{.TreeJSON}}');
+        var frontData = JSON.parse('{{.FrontendJSON}}');
+        var treeData = frontData['tree'];
         $(document).ready(function() {
             initTree(treeData);
         });

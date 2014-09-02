@@ -31,9 +31,8 @@ type userSqlRow struct {
 
 func GetHomePage(rw http.ResponseWriter, req *http.Request) {
     type Page struct {
-        Title string
+        Title, FrontendJSON string
         Conditions []Condition
-        TreeJSON string
         ConditionSqlRows []conditionSqlRow
         UserSqlRows []userSqlRow
     }
@@ -43,7 +42,7 @@ func GetHomePage(rw http.ResponseWriter, req *http.Request) {
     p := Page{
         Title: "home",
         Conditions: formattedConditions,
-        TreeJSON: frontendJSON,
+        FrontendJSON: frontendJSON,
         ConditionSqlRows: conditionSqlRows,
         UserSqlRows: getUserSqlRows(),
     }
@@ -51,13 +50,6 @@ func GetHomePage(rw http.ResponseWriter, req *http.Request) {
     common.Templates = template.Must(template.ParseFiles("templates/home/home.html", common.LayoutPath))
     err := common.Templates.ExecuteTemplate(rw, "base", p)
     common.CheckError(err, 2)
-}
-
-func GetMatchingUsers(rw http.ResponseWriter, req *http.Request) {
-    returnedUsers, _ := getMatchingUsers()
-    usersJSON := usersToJSON(returnedUsers)
-
-    rw.Write([]byte(usersJSON))
 }
 
 func ResetConditions(rw http.ResponseWriter, req *http.Request) {
@@ -109,10 +101,17 @@ func UpdateConditions(rw http.ResponseWriter, req *http.Request) {
 func getFrontendJSON() (string, []conditionSqlRow, []Condition) {
     sqlConditions := getConditions()
     conditionsTree := unserializeRawTree(sqlConditions)
+    conditionsTreeJSON := conditionsTree.toJSON()
     formattedConditions, err := serializeTree(conditionsTree)
     common.CheckError(err, 2)
 
-    return conditionsTree.toJSON(), sqlConditions, formattedConditions
+    returnedUsers, err := getMatchingUsers()
+    common.CheckError(err, 2)
+    usersJSON := usersToJSON(returnedUsers)
+
+    combinedJSON := fmt.Sprintf(`{"tree": %s, "matchingUsers": %s}`, conditionsTreeJSON, usersJSON)
+
+    return combinedJSON, sqlConditions, formattedConditions
 }
 
 
