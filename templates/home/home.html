@@ -4,7 +4,8 @@
     <script src="/static/js/app.js"></script>
 
     <script type="text/javascript">
-        var treeData = JSON.parse('{{.TreeJSON}}');
+        var frontData = JSON.parse('{{.FrontendJSON}}');
+        var treeData = frontData['tree'];
         $(document).ready(function() {
             initTree(treeData);
         });
@@ -37,7 +38,8 @@
                         <input type="submit">
                     </div>
                 </form>
-                <button id="resetConditions">Reset Everything</button>
+                <button class="resetConditions" data-reset-type="simple">Reset Everything Simple</button>
+                <button class="resetConditions" data-reset-type="advanced">Reset Everything Advanced</button>
             </td>
             <td>
                 <h4>Conditions (flat)</h4>
@@ -102,7 +104,7 @@
                     </thead>
                     <tbody>
                         {{range .UserSqlRows}}
-                            <tr>
+                            <tr id="{{.Id}}">
                                 <td>{{.Name}}</td>
                                 <td>{{.Age}}</td>
                                 <td>{{.NumPets}}</td>

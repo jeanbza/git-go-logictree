@@ -7,8 +7,24 @@ import (
 
 var testingTreeRoot *treeNode
 var testingConditions []Condition
-var testingJSONFrontend, testingJSONTree, testingMysqlEqualityInput, testingMysqlLogicInput, testingMysqlUsersInput string
+var testingJSONFrontend, testingJSONTree, testingMysqlEqualityInput, testingMysqlLogicInput, testingMysqlUsersInput, testingMysqlConditionsInput string
 var testingMysqlRows []conditionSqlRow
+
+func usersToJSON(users []userSqlRow) string {
+    json := "["
+
+    for key, user := range users {
+        if key != 0 {
+            json += ","
+        }
+
+        json += fmt.Sprintf(`{"Id": %d, "Name": "%s", "Age": %d, "NumPets": %d}`, user.Id, user.Name, user.Age, user.NumPets)
+    }
+
+    json += "]"
+
+    return json
+}
 
 func (t *treeNode) toJSON() string {
     return "[" + t.toJSONRecursively() + "]"
@@ -196,6 +212,30 @@ func conditionSqlMatchesArray(rowsA, rowsB []conditionSqlRow) bool {
     return true
 }
 
+func usersMatchesArray(rowsA, rowsB []userSqlRow) bool {
+    var truth bool
+
+    if rowsA == nil || len(rowsA) != len(rowsB) {
+        return false
+    }
+
+    for _, valA := range rowsA {
+        truth = false
+
+        for _, valB := range rowsB {
+            if valA.matches(valB) {
+                truth = true
+            }
+        }
+
+        if !truth {
+            return false
+        }
+    }
+
+    return true
+}
+
 func (a conditionSqlRow) matches(b conditionSqlRow) bool {
     if a.Field != b.Field {
         return false
@@ -247,6 +287,22 @@ func (treeNodeA *treeNode) matches(treeNodeB *treeNode) bool {
     return true
 }
 
+func (a userSqlRow) matches(b userSqlRow) bool {
+    if a.Name != b.Name {
+        return false
+    }
+
+    if a.Age != b.Age {
+        return false
+    }
+
+    if a.NumPets != b.NumPets {
+        return false
+    }
+
+    return true
+}
+
 func beforeEach(testName string) {
     fmt.Printf("Starting %s tests..\n", testName)
 
@@ -263,9 +319,9 @@ func beforeEach(testName string) {
     testingTreeRoot = &treeNode{Parent: nil, Children: nil, Node: Condition{Text: "AND", Type: "logic", Operator: "AND"}}
 
     // Row 2 node 1
-    child1 := treeNode{Parent: nil, Children: nil, Node: Condition{Text: "OR", Type: "logic", Operator: "OR"}}
+    child1 := treeNode{Parent: testingTreeRoot, Children: nil, Node: Condition{Text: "OR", Type: "logic", Operator: "OR"}}
     // Row 2 node 2
-    child2 := treeNode{Parent: nil, Children: nil, Node: Condition{Text: "OR", Type: "logic", Operator: "OR"}}
+    child2 := treeNode{Parent: testingTreeRoot, Children: nil, Node: Condition{Text: "OR", Type: "logic", Operator: "OR"}}
     testingTreeRoot.Children = []*treeNode{&child1, &child2}
 
     // Row 3 node 1
@@ -380,13 +436,16 @@ func beforeEach(testName string) {
     // INSERT INTO logictree.logic (operator, lt, rt) VALUES ...
     testingMysqlLogicInput = "('AND', 'logic', 3, 14),('OR', 'logic', 2, 17),('OR', 'logic', 18, 23),('AND', 'logic', 1, 24)"
     // INSERT INTO logictree.users (name, age, num_pets) VALUES ...
+    testingMysqlUsersInput = ""
     for i := 1; i < 500; i++ {
         if i != 1 {
             testingMysqlUsersInput += ","
         }
 
-        testingMysqlUsersInput += fmt.Sprintf("('bob%d%d', %d, %d)", i, 312897%i, 9423821%i, 1098423%i)
+        testingMysqlUsersInput += fmt.Sprintf("('bob%d', %d, %d)", 5%i, 7%i, 9%i)
     }
+
+    testingMysqlConditionsInput = "(((age = 4 AND age = 5 AND age = 6 AND age = 7 AND age = 8) OR age = 1) AND (age = 2 OR age = 3))"
 
     testingMysqlRows = []conditionSqlRow{
         conditionSqlRow{Operator: "AND", Type: "logic", Left: 1, Right: 24},
