@@ -7,7 +7,7 @@ import (
 
 var testingTreeRoot *treeNode
 var testingConditions []Condition
-var testingJSONFrontend, testingJSONTree, testingMysqlEqualityInput, testingMysqlLogicInput, testingMysqlUsersInput string
+var testingJSONFrontend, testingJSONTree, testingMysqlEqualityInput, testingMysqlLogicInput, testingMysqlUsersInput, testingMysqlConditionsInput string
 var testingMysqlRows []conditionSqlRow
 
 func (t *treeNode) toJSON() string {
@@ -428,6 +428,8 @@ func beforeEach(testName string) {
 
         testingMysqlUsersInput += fmt.Sprintf("('bob%d', %d, %d)", 5%i, 7%i, 9%i)
     }
+
+    testingMysqlConditionsInput = "(((age = 4 AND age = 5 AND age = 6 AND age = 7 AND age = 8) OR age = 1) AND (age = 2 OR age = 3))"
 
     testingMysqlRows = []conditionSqlRow{
         conditionSqlRow{Operator: "AND", Type: "logic", Left: 1, Right: 24},

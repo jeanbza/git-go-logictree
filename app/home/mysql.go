@@ -39,8 +39,12 @@ func (node *treeNode) toConditionMysql() string {
     }
 
     for key, child := range node.Children {
+        if key == 0 {
+            sql += "("
+        }
+
         if key != 0 {
-            sql += " " + node.Parent.Node.Operator + " "
+            sql += " " + child.Parent.Node.Operator + " "
         }
 
         if child.Children == nil || len(child.Children) == 0 {
@@ -48,6 +52,10 @@ func (node *treeNode) toConditionMysql() string {
             sql += sqlSegment
         } else {
             sql += child.toConditionMysql()
+        }
+
+        if key == len(node.Children)-1 {
+            sql += ")"
         }
     }
 

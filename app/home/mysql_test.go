@@ -34,6 +34,16 @@ func TestTreeToConditionMysqlThreeWideOneDeep(t *testing.T) {
     }
 }
 
+func TestTreeToConditionMysqlFull(t *testing.T) {
+    beforeEach("mysql")
+
+    sqlReturned := testingTreeRoot.toConditionMysql()
+
+    if sqlReturned != testingMysqlConditionsInput {
+        t.Errorf("%v.toConditionMysql() - got %v, want %v", testingTreeRoot.print(), sqlReturned, testingMysqlConditionsInput)
+    }
+}
+
 // func TestConditionMatchingErrorOperator(t *testing.T) {
 //     beforeEach("mysql")
 
