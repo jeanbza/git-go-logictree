@@ -51,63 +51,22 @@ func unserializeFormattedTree(conditions []Condition) (*treeNode, error) {
     return root.Children[0], nil
 }
 
+// Iterative approach, since we're handed a flat array:
+/*
+Iterate through conditions
+    Pop a condition from conditions
+    If root is unset
+        Set it with popped condition
+        Set root as the current node
+    Else
+        If popped condition's left is greater than popped item's right
+            You've gone past the encompassed (left and right within parent's left and right) children. This node may be a sibling, uncle, etc. Pop 
+            back up the parent chain until you find a parent that once again encompasses this child
+        Add the popped condition to the current node's children
+        If the current node is a branch
+            Go down a level - set it as the current branch
+*/
 func unserializeRawTree(conditions []conditionSqlRow) *treeNode {
-    conditionsToReturn, _ := unserializeRawTreeRecursively(conditions)
-
-    return conditionsToReturn
-}
-
-/**
- * Assumption: data should be ordered by LEFT
- * Recursive steps:
- * If current node is a branch:
- *      Create node with it
- *      Pop item from conditions
- *      Add children recursively
- * If node is a leaf:
- *      Create node with it
- *      Pop item from conditions
- * Return node
-
-
-WRONG
-
-
-
-Iterate through conditions
-    If current node right is below stored node right OR stored node is not set
-        If current node is a branch
-            Pop item from conditions
-            Store new node including left + right
-            Apply following nodes as children
-        If node is a leaf
-            Pop item from conditions
-            Add to children of stored node
-    If current node is above stored node right
-        Pop all the way back up until we're under the right parent (aka, the parent's left and right encompasses this node)
-        Apply conditions of part 1
-        
-
-
-RECURSIVELY:
-     
-     ?????
-
-Iterate through conditions
-    If current node right is below stored node right
-        If current node is a branch
-            Store new node including left + right
-            Pop item from conditions
-            Apply following nodes as children
-        If node is a leaf
-            Pop item from conditions
-            Return to be added to children of stored node
-    If current node is above stored node right
-        Pop up a level
-        Do NOT pop item off conditions
-
-**/
-func unserializeRawTreeRecursively(conditions []conditionSqlRow) (*treeNode, []conditionSqlRow) {
     var condition conditionSqlRow
     var node, root *treeNode
 
@@ -138,7 +97,7 @@ func unserializeRawTreeRecursively(conditions []conditionSqlRow) (*treeNode, []c
         }
     }
 
-    return root, conditions
+    return root
 }
 
 
