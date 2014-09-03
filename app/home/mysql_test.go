@@ -5,6 +5,103 @@ import (
     "github.com/jadekler/git-go-logictree/app/common"
 )
 
+func TestTreeToConditionMysqlSingle(t *testing.T) {
+    beforeEach("mysql")
+
+    in := &treeNode{Parent: nil, Children: nil, Node: Condition{Text: "age eq 81", Type: "equality", Field: "age", Operator: "eq", Value: "81"}}
+    expectedOut := "age = 81"
+    sqlReturned, _ := in.toConditionMysql()
+
+    if sqlReturned != expectedOut {
+        t.Errorf("%v.toConditionMysql() - got %v, want %v", in.print(), sqlReturned, expectedOut)
+    }
+}
+
+func TestTreeToConditionMysqlThreeWideOneDeep(t *testing.T) {
+    beforeEach("mysql")
+
+    in := &treeNode{Parent: nil, Children: nil, Node: Condition{Text: "AND", Type: "logic", Operator: "AND"}}
+
+    child1 := treeNode{Parent: in, Children: nil, Node: Condition{Text: "age eq 2", Type: "equality", Field: "age", Operator: "eq", Value: "2"}}
+    child2 := treeNode{Parent: in, Children: nil, Node: Condition{Text: "age eq 3", Type: "equality", Field: "age", Operator: "eq", Value: "3"}}
+    in.Children = []*treeNode{&child1, &child2}
+
+    expectedOut := "(age = 2 AND age = 3)"
+    sqlReturned, _ := in.toConditionMysql()
+
+    if sqlReturned != expectedOut {
+        t.Errorf("%v.toConditionMysql() - got %v, want %v", in.print(), sqlReturned, expectedOut)
+    }
+}
+
+func TestTreeToConditionMysqlFull(t *testing.T) {
+    beforeEach("mysql")
+
+    sqlReturned, _ := testingTreeRoot.toConditionMysql()
+
+    if sqlReturned != testingMysqlConditionsInput {
+        t.Errorf("%v.toConditionMysql() - got %v, want %v", testingTreeRoot.print(), sqlReturned, testingMysqlConditionsInput)
+    }
+}
+
+func TestConditionMatchingErrorOperator(t *testing.T) {
+    beforeEach("mysql")
+
+    common.DB.Query("TRUNCATE TABLE logictree.conditions")
+    common.DB.Query("INSERT INTO logictree.conditions (field, operator, value, type, lt, rt) VALUES ('age', 'ASD', 4, 'equality', 1, 2)")
+
+    common.DB.Query("TRUNCATE TABLE logictree.users")
+    common.DB.Query("INSERT INTO logictree.users (name, age, num_pets) VALUES ('bob', 4, 0), ('alex', 7, 4), ('sandra', 4, 1)")
+
+    returnedUsers, returnedErr := getMatchingUsers()
+    expectedError := "Error: your conditions contain an operator that isn't legit - ASD"
+
+    if returnedUsers != nil {
+        t.Errorf("getMatchingUsers returnedUsers - got %v, want %v", returnedUsers, nil)
+    }
+
+    if returnedErr.Error() != expectedError {
+        t.Errorf("getMatchingUsers err - got %v, want %v", returnedErr.Error(), expectedError)
+    }
+}
+
+func TestConditionMatchingSingle(t *testing.T) {
+    beforeEach("mysql")
+
+    common.DB.Query("TRUNCATE TABLE logictree.conditions")
+    common.DB.Query("INSERT INTO logictree.conditions (field, operator, value, type, lt, rt) VALUES ('age', 'eq', 4, 'equality', 1, 2)")
+
+    common.DB.Query("TRUNCATE TABLE logictree.users")
+    common.DB.Query("INSERT INTO logictree.users (name, age, num_pets) VALUES ('bob', 4, 0), ('alex', 7, 4), ('sandra', 4, 1)")
+
+    var returnedUsers []userSqlRow
+    returnedUsers, _ = getMatchingUsers()
+    expectedUsers := []userSqlRow{userSqlRow{Name: "bob", Age: 4, NumPets: 0}, userSqlRow{Name: "sandra", Age: 4, NumPets: 1}}
+
+    if !usersMatchesArray(returnedUsers, expectedUsers) {
+        t.Errorf("getMatchingUsers - got %v, want %v", returnedUsers, expectedUsers)
+    }
+}
+
+func TestConditionMatchingThreeWideOneDeep(t *testing.T) {
+    beforeEach("mysql")
+
+    common.DB.Query("TRUNCATE TABLE logictree.conditions")
+    common.DB.Query("INSERT INTO logictree.conditions (operator, type, lt, rt) VALUES ('AND', 'logic', 1, 8)")
+    common.DB.Query("INSERT INTO logictree.conditions (field, operator, value, type, lt, rt) VALUES ('age', 'gt', 0, 'equality', 2, 3), ('age', 'gt', 3, 'equality', 4, 5), ('age', 'lt', 8, 'equality', 6, 7)")
+
+    common.DB.Query("TRUNCATE TABLE logictree.users")
+    common.DB.Query("INSERT INTO logictree.users (name, age, num_pets) VALUES ('bob', 4, 0), ('alex', 7, 4), ('sandra', 4, 1), ('jordan', 10, 2)")
+
+    var returnedUsers []userSqlRow
+    returnedUsers, _ = getMatchingUsers()
+    expectedUsers := []userSqlRow{userSqlRow{Name: "bob", Age: 4, NumPets: 0}, userSqlRow{Name: "alex", Age: 7, NumPets: 4}, userSqlRow{Name: "sandra", Age: 4, NumPets: 1}}
+
+    if !usersMatchesArray(returnedUsers, expectedUsers) {
+        t.Errorf("getMatchingUsers - got %v, want %v", returnedUsers, expectedUsers)
+    }
+}
+
 // ATTACH LEFTS AND RIGHTS TO TREE: It should be able to assign lefts and rights to a tree
 func TestAttachLeftsAndRights(t *testing.T) {
     beforeEach("mysql")

@@ -26,23 +26,13 @@ type conditionSqlRow struct {
 
 type userSqlRow struct {
     Name string
-    Age, NumPets int
-}
-
-func getFrontendJSON() (string, []conditionSqlRow, []Condition) {
-    sqlConditions := getConditions()
-    conditionsTree := unserializeRawTree(sqlConditions)
-    formattedConditions, err := serializeTree(conditionsTree)
-    common.CheckError(err, 2)
-
-    return conditionsTree.toJSON(), sqlConditions, formattedConditions
+    Id, Age, NumPets int
 }
 
 func GetHomePage(rw http.ResponseWriter, req *http.Request) {
     type Page struct {
-        Title string
+        Title, FrontendJSON string
         Conditions []Condition
-        TreeJSON string
         ConditionSqlRows []conditionSqlRow
         UserSqlRows []userSqlRow
     }
@@ -52,7 +42,7 @@ func GetHomePage(rw http.ResponseWriter, req *http.Request) {
     p := Page{
         Title: "home",
         Conditions: formattedConditions,
-        TreeJSON: frontendJSON,
+        FrontendJSON: frontendJSON,
         ConditionSqlRows: conditionSqlRows,
         UserSqlRows: getUserSqlRows(),
     }
@@ -63,12 +53,29 @@ func GetHomePage(rw http.ResponseWriter, req *http.Request) {
 }
 
 func ResetConditions(rw http.ResponseWriter, req *http.Request) {
-    beforeEach("no")
+    resetType := req.FormValue("resetType");
 
-    updateDatabase(testingMysqlEqualityInput, testingMysqlLogicInput, testingMysqlUsersInput)
+    switch resetType {
+    case "simple":
+        treeRoot := &treeNode{Parent: nil, Children: nil, Node: Condition{Text: "AND", Type: "logic", Operator: "AND"}}
+
+        child1 := treeNode{Parent: treeRoot, Children: nil, Node: Condition{Text: "age gt 4", Type: "equality", Field: "age", Operator: "gt", Value: "4"}}
+        child2 := treeNode{Parent: treeRoot, Children: nil, Node: Condition{Text: "num_pets lt 2", Type: "equality", Field: "num_pets", Operator: "lt", Value: "2"}}
+        treeRoot.Children = []*treeNode{&child1, &child2}
+
+        equalitySql, logicSql, err := treeRoot.toMysql()
+        common.CheckError(err, 2)
+
+        updateDatabase(equalitySql, logicSql, testingMysqlUsersInput)
+    case "advanced":
+        fallthrough
+    default:
+        beforeEach("no")
+
+        updateDatabase(testingMysqlEqualityInput, testingMysqlLogicInput, testingMysqlUsersInput)
+    }
 
     frontendJSON, _, _ := getFrontendJSON()
-
     rw.Write([]byte(frontendJSON))
 }
 
@@ -91,6 +98,20 @@ func UpdateConditions(rw http.ResponseWriter, req *http.Request) {
     rw.Write([]byte(frontendJSON))
 }
 
+func getFrontendJSON() (string, []conditionSqlRow, []Condition) {
+    sqlConditions := getConditions()
+    conditionsTree := unserializeRawTree(sqlConditions)
+    conditionsTreeJSON := conditionsTree.toJSON()
+    formattedConditions, err := serializeTree(conditionsTree)
+    common.CheckError(err, 2)
 
+    returnedUsers, err := getMatchingUsers()
+    common.CheckError(err, 2)
+    usersJSON := usersToJSON(returnedUsers)
+
+    combinedJSON := fmt.Sprintf(`{"tree": %s, "matchingUsers": %s}`, conditionsTreeJSON, usersJSON)
+
+    return combinedJSON, sqlConditions, formattedConditions
+}
 
 

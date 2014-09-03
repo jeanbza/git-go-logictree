@@ -12,7 +12,9 @@ $(document).ready(function() {
 });
 
 function setupResetConditions() {
-    $("#resetConditions").click(resetConditions);
+    $(".resetConditions").click(function() {
+        resetConditions($(this).attr('data-reset-type'));
+    });
 }
 
 function setupUpdateConditions() {
@@ -24,13 +26,32 @@ function setupDraggables() {
     $("#sortable").disableSelection();
 }
 
-function resetConditions() {
+function resetConditions(resetType) {
     $.ajax({
         url: "/reset",
         method: "PUT",
         cache: false,
+        data: {
+            resetType: resetType
+        },
         success: function(data) {
-            redrawData(JSON.parse(data));
+            data = JSON.parse(data);
+
+            redrawData(data['tree']);
+            rematchUsers(data['matchingUsers']);
+        }
+    });
+}
+
+function rematchUsers(matchingUsers) {
+    $(".user-sql-rows tr").each(function(key, elem) {
+        elemIsMatchingUser = $.grep(matchingUsers, function(e){ return e.Id == $(elem).attr('id'); }).length > 0;
+        
+        if (elemIsMatchingUser) {
+            console.dir("bam");
+            $(elem).css('background-color', 'green');
+        } else {
+            $(elem).css('background-color', 'red');
         }
     });
 }
@@ -72,7 +93,10 @@ function updateConditions() {
             conditions: JSON.stringify(conditions)
         },
         success: function(data) {
-            redrawData(JSON.parse(data));
+            data = JSON.parse(data);
+
+            redrawData(data['tree']);
+            rematchUsers(data['matchingUsers']);
         }
     });
 }
