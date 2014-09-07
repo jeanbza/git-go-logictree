@@ -55,6 +55,8 @@ func GetHomePage(rw http.ResponseWriter, req *http.Request) {
 func ResetConditions(rw http.ResponseWriter, req *http.Request) {
     resetType := req.FormValue("resetType");
 
+    beforeEach("no")
+
     switch resetType {
     case "simple":
         treeRoot := &treeNode{Parent: nil, Children: nil, Node: Condition{Text: "AND", Type: "logic", Operator: "AND"}}
@@ -70,8 +72,6 @@ func ResetConditions(rw http.ResponseWriter, req *http.Request) {
     case "advanced":
         fallthrough
     default:
-        beforeEach("no")
-
         updateDatabase(testingMysqlEqualityInput, testingMysqlLogicInput, testingMysqlUsersInput)
     }
 
@@ -100,6 +100,11 @@ func UpdateConditions(rw http.ResponseWriter, req *http.Request) {
 
 func getFrontendJSON() (string, []conditionSqlRow, []Condition) {
     sqlConditions := getConditions()
+
+    if len(sqlConditions) == 0 {
+        return fmt.Sprintf(`{"tree": %s, "matchingUsers": %s}`, "{}", "{}"), nil, nil
+    }
+
     conditionsTree := unserializeRawTree(sqlConditions)
     conditionsTreeJSON := conditionsTree.toJSON()
     formattedConditions, err := serializeTree(conditionsTree)

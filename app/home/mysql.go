@@ -164,9 +164,6 @@ func updateDatabase(equalityStr, logicStr, usersStr string) {
     _, err := common.DB.Query("TRUNCATE TABLE logictree.conditions")
     common.CheckError(err, 2)
 
-    _, err = common.DB.Query("TRUNCATE TABLE logictree.users")
-    common.CheckError(err, 2)
-
     if equalityStr != "" {
         _, err = common.DB.Query("INSERT INTO logictree.conditions (field, operator, value, type, lt, rt) VALUES "+equalityStr)
         common.CheckError(err, 2)
@@ -178,6 +175,9 @@ func updateDatabase(equalityStr, logicStr, usersStr string) {
     }
 
     if usersStr != "" {
+        _, err = common.DB.Query("TRUNCATE TABLE logictree.users")
+        common.CheckError(err, 2)
+
         _, err = common.DB.Query("INSERT INTO logictree.users (name, age, num_pets) VALUES "+usersStr)
         common.CheckError(err, 2)
     }

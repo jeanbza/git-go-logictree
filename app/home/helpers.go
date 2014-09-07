@@ -3,6 +3,7 @@ package home
 import (
     "encoding/json"
     "fmt"
+    "math/rand"
 )
 
 var testingTreeRoot *treeNode
@@ -442,7 +443,9 @@ func beforeEach(testName string) {
             testingMysqlUsersInput += ","
         }
 
-        testingMysqlUsersInput += fmt.Sprintf("('bob%d', %d, %d)", 5%i, 7%i, 9%i)
+        r := rand.New(rand.NewSource(int64(i)))
+
+        testingMysqlUsersInput += fmt.Sprintf("('bob%d', %d, %d)", r.Int()%29, r.Int()%31, r.Int()%47)
     }
 
     testingMysqlConditionsInput = "(((age = 4 AND age = 5 AND age = 6 AND age = 7 AND age = 8) OR age = 1) AND (age = 2 OR age = 3))"
