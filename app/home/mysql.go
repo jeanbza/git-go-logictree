@@ -6,7 +6,8 @@ import (
     "github.com/jadekler/git-go-logictree/app/common"
 )
 
-func getMatchingUsers() ([]userSqlRow, error) {
+func getUsers(matchingOnly bool) ([]userSqlRow, error) {
+    var whereCondition string
     conditions := getConditions()
     tree := unserializeRawTree(conditions)
 
@@ -16,7 +17,11 @@ func getMatchingUsers() ([]userSqlRow, error) {
         return nil, err
     }
 
-    sql := "SELECT id, name, age, num_pets FROM logictree.users WHERE " + conditionSql
+    if matchingOnly {
+         whereCondition = "WHERE " + conditionSql
+    }
+
+    sql := "SELECT id, name, age, num_pets FROM logictree.users " + whereCondition
 
     var name string
     var id, age, numPets int

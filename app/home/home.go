@@ -38,7 +38,7 @@ func GetHomePage(rw http.ResponseWriter, req *http.Request) {
     }
 
     frontendJSON, conditionSqlRows, formattedConditions := getFrontendJSON()
-    
+
     p := Page{
         Title: "home",
         Conditions: formattedConditions,
@@ -110,11 +110,15 @@ func getFrontendJSON() (string, []conditionSqlRow, []Condition) {
     formattedConditions, err := serializeTree(conditionsTree)
     common.CheckError(err, 2)
 
-    returnedUsers, err := getMatchingUsers()
+    matchingUsers, err := getUsers(true)
     common.CheckError(err, 2)
-    usersJSON := usersToJSON(returnedUsers)
+    matchingUsersJSON := usersToJSON(matchingUsers)
 
-    combinedJSON := fmt.Sprintf(`{"tree": %s, "matchingUsers": %s}`, conditionsTreeJSON, usersJSON)
+    allUsers, err := getUsers(false)
+    common.CheckError(err, 2)
+    allUsersJSON := usersToJSON(allUsers)
+
+    combinedJSON := fmt.Sprintf(`{"tree": %s, "allUsers": %s, "matchingUsers": %s}`, conditionsTreeJSON, allUsersJSON, matchingUsersJSON)
 
     return combinedJSON, sqlConditions, formattedConditions
 }

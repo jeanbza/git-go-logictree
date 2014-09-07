@@ -53,7 +53,7 @@ func TestConditionMatchingErrorOperator(t *testing.T) {
     common.DB.Query("TRUNCATE TABLE logictree.users")
     common.DB.Query("INSERT INTO logictree.users (name, age, num_pets) VALUES ('bob', 4, 0), ('alex', 7, 4), ('sandra', 4, 1)")
 
-    returnedUsers, returnedErr := getMatchingUsers()
+    returnedUsers, returnedErr := getUsers(true)
     expectedError := "Error: your conditions contain an operator that isn't legit - ASD"
 
     if returnedUsers != nil {
@@ -75,7 +75,7 @@ func TestConditionMatchingSingle(t *testing.T) {
     common.DB.Query("INSERT INTO logictree.users (name, age, num_pets) VALUES ('bob', 4, 0), ('alex', 7, 4), ('sandra', 4, 1)")
 
     var returnedUsers []userSqlRow
-    returnedUsers, _ = getMatchingUsers()
+    returnedUsers, _ = getUsers(true)
     expectedUsers := []userSqlRow{userSqlRow{Name: "bob", Age: 4, NumPets: 0}, userSqlRow{Name: "sandra", Age: 4, NumPets: 1}}
 
     if !usersMatchesArray(returnedUsers, expectedUsers) {
@@ -94,7 +94,7 @@ func TestConditionMatchingThreeWideOneDeep(t *testing.T) {
     common.DB.Query("INSERT INTO logictree.users (name, age, num_pets) VALUES ('bob', 4, 0), ('alex', 7, 4), ('sandra', 4, 1), ('jordan', 10, 2)")
 
     var returnedUsers []userSqlRow
-    returnedUsers, _ = getMatchingUsers()
+    returnedUsers, _ = getUsers(true)
     expectedUsers := []userSqlRow{userSqlRow{Name: "bob", Age: 4, NumPets: 0}, userSqlRow{Name: "alex", Age: 7, NumPets: 4}, userSqlRow{Name: "sandra", Age: 4, NumPets: 1}}
 
     if !usersMatchesArray(returnedUsers, expectedUsers) {

@@ -38,17 +38,25 @@ function resetConditions(resetType) {
             data = JSON.parse(data);
 
             redrawData(data['tree']);
+            redrawUsers(data['allUsers']);
             rematchUsers(data['matchingUsers']);
         }
     });
 }
 
+function redrawUsers(allUsers) {
+    $(".user-sql-rows tbody").empty();
+
+    allUsers.forEach(function(user) {
+        $(".user-sql-rows tbody").append("<tr id="+user.Id+"><td>"+user.Name+"</td><td>"+user.Age+"</td><td>"+user.NumPets+"</td></tr>");
+    });
+}
+
 function rematchUsers(matchingUsers) {
-    $(".user-sql-rows tr").each(function(key, elem) {
+    $(".user-sql-rows tbody tr").each(function(key, elem) {
         elemIsMatchingUser = $.grep(matchingUsers, function(e){ return e.Id == $(elem).attr('id'); }).length > 0;
         
         if (elemIsMatchingUser) {
-            console.dir("bam");
             $(elem).css('background-color', 'green');
         } else {
             $(elem).css('background-color', 'red');
