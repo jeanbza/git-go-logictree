@@ -4,6 +4,7 @@ import (
     "errors"
 )
 
+// Traverses the tree post-order and creates a serialized string representation
 func serializeTree(node *treeNode) ([]Condition, error) {
     if node.Children == nil || len(node.Children) == 0 {
         // Has no children - should be equality

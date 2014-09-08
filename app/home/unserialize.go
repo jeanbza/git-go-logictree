@@ -1,5 +1,6 @@
 package home
 
+// Recursively creates a tree from an array of conditions using the logic below
 /** Treat conditions like a queue. Rules:
  * If you reach a (, pop the condition, drop down a depth and assign results to root's children
  * If you reach a ), pop the condition, pop back up a depth with the root
@@ -51,8 +52,9 @@ func unserializeFormattedTree(conditions []Condition) (*treeNode, error) {
     return root.Children[0], nil
 }
 
-// Iterative approach, since we're handed a flat array:
+// Iteratively creates a tree from an array of mysql conditions using the logic below
 /*
+Iterative approach, since we're handed a flat array:
 Iterate through conditions
     Pop a condition from conditions
     If root is unset

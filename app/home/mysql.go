@@ -6,6 +6,7 @@ import (
     "github.com/jadekler/git-go-logictree/app/common"
 )
 
+// Gets users from mysql - set matchingOnly to true to only receive users who match the conditions
 func getUsers(matchingOnly bool) ([]userSqlRow, error) {
     var whereCondition string
     conditions := getConditions()
@@ -127,7 +128,7 @@ func getUserSqlRows() []userSqlRow {
     return userRowsReturned
 }
 
-// Used for inserts only
+// Used for inserts only - turns a tree into a set of INSERT INTO ... VALUES ... statements
 func (t *treeNode) toMysql() (equalityStr, logicStr string, err error) {
     t.attachLeftsAndRights()
 
