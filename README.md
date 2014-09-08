@@ -3,9 +3,29 @@ logic-tree
 
 [![Build Status](https://travis-ci.org/jadekler/git-go-logictree.svg?branch=master)](https://travis-ci.org/jadekler/git-go-logictree)
 
+### Installation
+
+1. `go get github.com/jadekler/git-go-logictree`
+1. `go run $GOPATH/src/github.com/jadekler/git-go-logictree/main.go`
+1. Navigate to `localhost:8080` in your browser
+
+### Testing
+
+To test locally, simply run `go test -v ./...` from the project root.
+
+Note: Useful testing command: `printf "$(go test $GOPATH/src/github.com/jadekler/git-go-logictree/app/home | sed 's/::/\\n/g')" && echo;`
+
 ### What's it about?
 
 This program is a pretty simple [lexical analyzer](http://en.wikipedia.org/wiki/Lexical_analysis) that accepts human-readable conditions, such as 'age greater than 5', and translates it to mysql-queryable language. The basic case is fairly simple, but the more advanced cases, such as '(age is greater than 5 or number of pets is less than 2) and age is less than 9', require a bit more work. The intermediary step between human-readable conditions and mysql conditions is implemented as a tree. Additionally, the human-readable conditions are stored in mysql as a left-right hierarchy tree (which represents nested sets). See more detail on the tree and nested sets below.
+
+### Three-stage representation
+
+The setup for this app is: human-readable on the front, golang tree in the middle, mysql nested sets in the back. Here is a basic overview of how the stages interact:
+
+![alt tag](https://raw.github.com/jadekler/git-go-logictree/master/static/images/flowchart.png)
+
+Below are the explanation for each stage.
 
 #### Frontend representation of conditions - Human-readable language
 
@@ -46,14 +66,6 @@ age = 2, 19, 20
 age = 3, 21, 22
 ```
 
-### Installation
+### Questions and feedback
 
-1. `go get github.com/jadekler/git-go-logictree`
-1. `go run $GOPATH/src/github.com/jadekler/git-go-logictree/main.go`
-1. Navigate to `localhost:8080` in your browser
-
-### Testing
-
-To test locally, simply run `go test -v ./...` from the project root.
-
-Note: Useful testing command: `printf "$(go test $GOPATH/src/github.com/jadekler/git-go-logictree/app/home | sed 's/::/\\n/g')" && echo;`
+Please shoot any questions or feedback over to jadekler@gmail.com.
