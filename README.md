@@ -65,3 +65,7 @@ OR, 18, 23
 age = 2, 19, 20
 age = 3, 21, 22
 ```
+
+### Questions and feedback
+
+Please shoot any questions or feedback over to [jadekler@gmail.com](jadekler@gmail.com).
