@@ -26,10 +26,14 @@ func main() {
     router.HandleFunc("/conditions", home.UpdateConditions).Methods("PUT")
     router.HandleFunc("/reset", home.ResetConditions).Methods("PUT")
 
-    fileServer := http.StripPrefix("/static/", http.FileServer(http.Dir("static")))
-    http.Handle("/static/", fileServer)
+    fileServer := http.StripPrefix("/logictree-static/", http.FileServer(http.Dir("logictree-static")))
+    http.Handle("/logictree-static/", fileServer)
 
     http.ListenAndServe(":8080", nil)
+}
+
+func InitFileserver(router *mux.Router) {
+
 }
 
 func httpInterceptor(w http.ResponseWriter, req *http.Request) {

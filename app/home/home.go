@@ -47,7 +47,7 @@ func GetHomePage(rw http.ResponseWriter, req *http.Request) {
         UserSqlRows: getUserSqlRows(),
     }
 
-    common.Templates = template.Must(template.ParseFiles("templates/home/home.html", common.LayoutPath))
+    common.Templates = template.Must(template.ParseFiles(common.AppDir + "/templates/home/home.html", common.LayoutPath))
     err := common.Templates.ExecuteTemplate(rw, "base", p)
     common.CheckError(err, 2)
 }
