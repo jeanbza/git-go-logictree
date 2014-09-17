@@ -6,6 +6,8 @@ logic-tree
 ### Installation
 
 1. `go get github.com/jadekler/git-go-logictree`
+1. Navigate to the project directory
+1. `go test ./...` (make sure mysql is running and root/no pwd is enabled)
 1. `go run $GOPATH/src/github.com/jadekler/git-go-logictree/main.go`
 1. Navigate to `localhost:8080` in your browser
 
