@@ -23,7 +23,7 @@ This program is a pretty simple [lexical analyzer](http://en.wikipedia.org/wiki/
 
 The setup for this app is: human-readable on the front, golang tree in the middle, mysql nested sets in the back. Here is a basic overview of how the stages interact:
 
-![alt tag](https://raw.github.com/jadekler/git-go-logictree/master/static/images/flowchart.png)
+![](https://raw.github.com/jadekler/git-go-logictree/master/logictree-static/images/flowchart.png)
 
 Below are the explanation for each stage.
 
@@ -31,7 +31,7 @@ Below are the explanation for each stage.
 
 The front end is represented as a set of parenthesis, equality conditions, and logical conditions. Combined, they look like this:
 
-![alt tag](https://raw.github.com/jadekler/git-go-logictree/master/static/images/conditions.png)
+![](https://raw.github.com/jadekler/git-go-logictree/master/logictree-static/images/conditions.png)
 
 Each block is draggable - by clicking the 'Save Re-ordering' button on the page, the re-ordered conditions are saved in mysql. The conditions will also be converted to a mysql query and executed against a dummy users table, with results displayed at the bottom of the page.
 
@@ -39,13 +39,13 @@ Each block is draggable - by clicking the 'Save Re-ordering' button on the page,
 
 We use a tree as an intermediary between the human-readable conditions on the front and interactions with mysql, including saving the conditions, executing the conditions, and converting the conditions (via tree) into human-readable conditions for the front. The tree is a simple n-child tree that is generally traversed post-order. The branches are logical conditions, and the leaves are equality conditions. For instance, (A OR B) would be represented as OR being the branch and A and B being two children of OR, and so on. See below a larger example (taken from the app):
 
-![alt tag](https://raw.github.com/jadekler/git-go-logictree/master/static/images/tree.png)
+![](https://raw.github.com/jadekler/git-go-logictree/master/logictree-static/images/tree.png)
 
 #### Database representation of conditions - Nested sets
 
 The general idea behind storing a tree in mysql as nested sets is well explained [here](http://mikehillyer.com/articles/managing-hierarchical-data-in-mysql/). The basic idea, however, is that each condition is a set, and each child (in the aforementioned tree) is a set within the set that is its parent condition. Once we have so ordered our sets, we can assign lefts and rights to them as below:
 
-![alt tag](https://raw.github.com/jadekler/git-go-logictree/master/static/images/nested_sets.png)
+![](https://raw.github.com/jadekler/git-go-logictree/master/logictree-static/images/nested_sets.png)
 
 In mysql, this becomes:
 
