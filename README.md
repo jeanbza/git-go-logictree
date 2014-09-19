@@ -68,6 +68,30 @@ age = 2, 19, 20
 age = 3, 21, 22
 ```
 
+### Time and Space Complexity
+
+The space complexity is O(n) in both the server language and mysql - that is, we store each node and no additional information both in mysql and in our tree (we use pointers in the tree for parents and children).
+
+The time complexity is as follows:
+
+##### Unserialize From Mysql To Go
+
+The function that deals with this is called [unserializeRawTree](https://github.com/jadekler/git-go-logictree/blob/master/app/home/unserialize.go#L71). This function assumes a set of conditions pulled from mysql ordered by the LEFT column ascending. It iterates through the conditions, popping conditions off and creating the tree until the conditions are empty. So, we touch each condition only once - this function runs in O(n).
+
+##### Unserialize From Frontend * To Go
+
+The function that deals with this is called [unserializeFormattedTree](https://github.com/jadekler/git-go-logictree/blob/master/app/home/unserialize.go#L11). I realize my naming scheme is awful. Anyways, this function iterates over leaves and recurses through branches, building the tree as it goes and relying on the recursive call to glue it all together. So once again, we touch each condition only once - again, this function runs in O(n).
+
+##### Serialize From Go To Frontend *
+
+The function that deals with this is called [serializeTree](https://github.com/jadekler/git-go-logictree/blob/master/app/home/serialize.go#L8). It traverses the tree post-order, building a linear array of conditions as it goes. This function runs in O(n).
+
+##### Serialize From Go To Mysql
+
+The function that deals with this is called [toJSON](https://github.com/jadekler/git-go-logictree/blob/master/app/home/helpers.go#L30) (actually, the helper function toJSONRecursively does the real work) and simply traverses the tree post-order in O(n) time.
+
+\* By frontend, I mean a linear array of conditions, including parenthesis that surround children.
+
 ### Questions and feedback
 
 Please shoot any questions or feedback over to jadekler@gmail.com.
