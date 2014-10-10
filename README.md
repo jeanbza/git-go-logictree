@@ -19,7 +19,7 @@ Note: Useful testing command: `printf "$(go test $GOPATH/src/github.com/jadekler
 
 ### What's it about?
 
-This program is a pretty simple [lexical analyzer](http://en.wikipedia.org/wiki/Lexical_analysis) (which only parses) that accepts human-readable conditions, such as 'age greater than 5', and translates it to mysql-queryable language. The basic case is fairly simple, but the more advanced cases, such as '(age is greater than 5 or number of pets is less than 2) and age is less than 9', require a bit more work. The intermediary step between human-readable conditions and mysql conditions is implemented as a tree. Additionally, the human-readable conditions are stored in mysql as a left-right hierarchy tree (which represents nested sets). See more detail on the tree and nested sets below.
+This program is a pretty simple [lexical analyzer](http://en.wikipedia.org/wiki/Lexical_analysis) that accepts human-readable conditions, such as 'age greater than 5', and translates it to mysql-queryable language. The basic case is fairly simple, but the more advanced cases, such as '(age is greater than 5 or number of pets is less than 2) and age is less than 9', require a bit more work. The intermediary step between human-readable conditions and mysql conditions is implemented as a tree. Additionally, the human-readable conditions are stored in mysql as a left-right hierarchy tree (which represents nested sets). See more detail on the tree and nested sets below.
 
 ### Three-stage representation
 
