@@ -76,7 +76,14 @@ The time complexity is as follows:
 
 ##### Unserialize From Mysql To Go
 
-The function that deals with this is called [unserializeRawTree](https://github.com/jadekler/git-go-logictree/blob/master/app/home/unserialize.go#L71). This function assumes a set of conditions pulled from mysql ordered by the LEFT column ascending. It iterates through the conditions, popping conditions off and creating the tree until the conditions are empty. So, we touch each condition only once - this function runs in O(n).
+The function that deals with this is called [unserializeRawTree](https://github.com/jadekler/git-go-logictree/blob/master/app/home/unserialize.go#L71). This function assumes a set of conditions pulled from mysql ordered by the LEFT column ascending. It iterates through the conditions, popping conditions off and creating the tree until the conditions are empty. 
+
+The two sides to the equation:
+
+- Pop each condition from the array - `O(n)`
+- Insert each condition into a *non-binary, unbalanced* tree. In the worst case, we assume a left-leaning tree. Each item must traverse over each item previously inserted. Therefore, the traversal operations per condition are `1+2+...+(n-1)+n`. This series converges to `(1/2)n(n+1)`, which gives us `O(n^2)`.
+
+Finally, we see that the time complexity is `O(n)+O(n^2) = O(n^2)`.
 
 ##### Unserialize From Frontend * To Go
 
