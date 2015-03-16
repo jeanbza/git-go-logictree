@@ -87,15 +87,15 @@ Finally, we see that the time complexity is `O(n)+O(n^2) = O(n^2)`.
 
 ##### Unserialize From Frontend * To Go
 
-The function that deals with this is called [unserializeFormattedTree](https://github.com/jadekler/git-go-logictree/blob/master/app/home/unserialize.go#L11). I realize my naming scheme is awful. Anyways, this function iterates over leaves and recurses through branches, building the tree as it goes and relying on the recursive call to glue it all together. So once again, we touch each condition only once - again, this function runs in O(n).
+The function that deals with this is called [unserializeFormattedTree](https://github.com/jadekler/git-go-logictree/blob/master/app/home/unserialize.go#L11). I realize my naming scheme is awful. Anyways, this function iterates over leaves and recurses through branches, building the tree as it goes and relying on the recursive call to glue it all together. So once again, we touch each condition only once - this function runs in `O(n)`.
 
 ##### Serialize From Go To Frontend *
 
-The function that deals with this is called [serializeTree](https://github.com/jadekler/git-go-logictree/blob/master/app/home/serialize.go#L8). It traverses the tree post-order, building a linear array of conditions as it goes. This function runs in O(n).
+The function that deals with this is called [serializeTree](https://github.com/jadekler/git-go-logictree/blob/master/app/home/serialize.go#L8). It traverses the tree post-order, building a linear array of conditions as it goes. Again, we traverse the tree touching each condition once - this function runs in `O(n)`.
 
 ##### Serialize From Go To Mysql
 
-The function that deals with this is called [toJSON](https://github.com/jadekler/git-go-logictree/blob/master/app/home/helpers.go#L30) (actually, the helper function toJSONRecursively does the real work) and simply traverses the tree post-order in O(n) time.
+The function that deals with this is called [toJSON](https://github.com/jadekler/git-go-logictree/blob/master/app/home/helpers.go#L30) (actually, the helper function toJSONRecursively does the real work) and once again simply traverses the tree post-order in `O(n)` time.
 
 \* By frontend, I mean a linear array of conditions, including parenthesis that surround children.
 
